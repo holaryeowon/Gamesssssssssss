@@ -1,0 +1,3906 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-i18n="pageTitle">하늘과 구름 배경</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      min-height: 100dvh;
+      overflow: hidden;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sky {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(
+        180deg,
+        #87ceeb 0%,
+        #b8e0f4 35%,
+        #e8f4fc 70%,
+        #fef9e7 100%
+      );
+      transition: background 0.85s ease;
+    }
+
+    /* 벌집 안: 어두운 벌통·꿀빛 + 육각 격자 느낌 */
+    body.bbatkkot-hive-inside .sky {
+      background-color: #140c08;
+      background-image:
+        radial-gradient(ellipse 95% 55% at 50% 0%, rgba(255, 205, 90, 0.18) 0%, transparent 52%),
+        radial-gradient(ellipse 70% 45% at 80% 70%, rgba(180, 120, 40, 0.12) 0%, transparent 50%),
+        repeating-linear-gradient(
+          120deg,
+          rgba(90, 58, 22, 0.45) 0,
+          rgba(90, 58, 22, 0.45) 1px,
+          transparent 1px,
+          transparent 26px
+        ),
+        repeating-linear-gradient(
+          60deg,
+          rgba(40, 26, 12, 0.55) 0,
+          rgba(40, 26, 12, 0.55) 1px,
+          transparent 1px,
+          transparent 26px
+        ),
+        repeating-linear-gradient(
+          0deg,
+          rgba(100, 68, 28, 0.2) 0,
+          rgba(100, 68, 28, 0.2) 1px,
+          transparent 1px,
+          transparent 22px
+        ),
+        linear-gradient(178deg, #4d3518 0%, #2a1a0c 42%, #0a0604 100%);
+    }
+
+    body.bbatkkot-hive-inside .clouds,
+    body.bbatkkot-hive-inside .clouds-back {
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.65s ease, visibility 0s linear 0.65s;
+    }
+
+    /* 구름 레이어 공통 */
+    .clouds {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .cloud {
+      position: absolute;
+      background: #fff;
+      border-radius: 200px;
+      filter: drop-shadow(0 4px 12px rgba(100, 140, 180, 0.15));
+      opacity: 0.92;
+    }
+
+    .cloud::before,
+    .cloud::after {
+      content: "";
+      position: absolute;
+      background: #fff;
+      border-radius: 200px;
+    }
+
+    /* 개별 구름 모양 */
+    .c1 {
+      --s: 1;
+      width: 120px;
+      height: 40px;
+      top: 18%;
+      left: -140px;
+      animation: drift 45s linear infinite;
+    }
+    .c1::before {
+      width: 50px;
+      height: 50px;
+      top: -25px;
+      left: 20px;
+    }
+    .c1::after {
+      width: 70px;
+      height: 45px;
+      top: -18px;
+      left: 55px;
+    }
+
+    .c2 {
+      --s: 0.9;
+      width: 160px;
+      height: 52px;
+      top: 32%;
+      left: -200px;
+      animation: drift 60s linear infinite 8s;
+      opacity: 0.85;
+    }
+    .c2::before {
+      width: 65px;
+      height: 65px;
+      top: -32px;
+      left: 25px;
+    }
+    .c2::after {
+      width: 88px;
+      height: 55px;
+      top: -22px;
+      left: 72px;
+    }
+
+    .c3 {
+      --s: 0.75;
+      width: 100px;
+      height: 34px;
+      top: 48%;
+      left: -120px;
+      animation: drift 38s linear infinite 15s;
+      opacity: 0.78;
+    }
+    .c3::before {
+      width: 42px;
+      height: 42px;
+      top: -20px;
+      left: 15px;
+    }
+    .c3::after {
+      width: 55px;
+      height: 36px;
+      top: -14px;
+      left: 45px;
+    }
+
+    .c4 {
+      --s: 1;
+      width: 200px;
+      height: 60px;
+      top: 62%;
+      left: -240px;
+      animation: drift 52s linear infinite 3s;
+      opacity: 0.88;
+    }
+    .c4::before {
+      width: 80px;
+      height: 80px;
+      top: -38px;
+      left: 30px;
+    }
+    .c4::after {
+      width: 100px;
+      height: 62px;
+      top: -28px;
+      left: 95px;
+    }
+
+    .c5 {
+      --s: 0.85;
+      width: 130px;
+      height: 44px;
+      top: 78%;
+      left: -150px;
+      animation: drift 42s linear infinite 22s;
+      opacity: 0.72;
+    }
+    .c5::before {
+      width: 52px;
+      height: 52px;
+      top: -26px;
+      left: 22px;
+    }
+    .c5::after {
+      width: 72px;
+      height: 46px;
+      top: -18px;
+      left: 58px;
+    }
+
+    @keyframes drift {
+      from {
+        transform: translateX(0) scale(var(--s, 1));
+      }
+      to {
+        transform: translateX(calc(100vw + 280px)) scale(var(--s, 1));
+      }
+    }
+
+    .clouds-back .cloud {
+      --s: 0.65;
+      opacity: 0.55;
+      filter: blur(1px);
+    }
+    .clouds-back .c1 { animation-duration: 75s; top: 22%; }
+    .clouds-back .c2 { animation-duration: 90s; top: 55%; left: -220px; }
+
+    /* 배경 꿀벌 — 원·8자 궤도 (앞 구름 위: DOM에서 clouds 뒤에 둠) */
+    .bees {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 1;
+      transform: translateX(0);
+    }
+
+    /* 시작하기: y 고정(translateX만) · 살짝 왼쪽 당김 → 오른쪽으로 쭉 나가서 화면 밖 */
+    @keyframes bee-start-dash {
+      0% {
+        transform: translate3d(0, 0, 0);
+      }
+      10% {
+        transform: translate3d(-28px, 0, 0);
+      }
+      100% {
+        transform: translate3d(calc(100vw + 180px), 0, 0);
+      }
+    }
+
+    .bees.bees--start-dash {
+      animation: bee-start-dash 1.15s cubic-bezier(0.22, 0.65, 0.28, 1) forwards;
+      will-change: transform;
+    }
+
+    .bees.bees--offscreen {
+      transform: translate3d(calc(100vw + 180px), 0, 0);
+      will-change: auto;
+    }
+
+    /* 노랑이 채워진 뒤 짧게 멈춤 → 퇴장 → 참나무 */
+    .bee-honey-flood {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .bee-honey-flood.is-active {
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .bee-honey-flood__wave {
+      position: absolute;
+      inset: 0;
+      clip-path: circle(0% at 0 0);
+      will-change: clip-path;
+    }
+
+    .bee-honey-flood__wave--1 {
+      background: radial-gradient(
+        circle at 0 0,
+        #fffde7 0%,
+        #ffeb3b 42%,
+        #fbc02d 78%,
+        #f9a825 100%
+      );
+      opacity: 0.97;
+    }
+
+    .bee-honey-flood__wave--2 {
+      background: radial-gradient(
+        circle at 0 0,
+        #ffe082 0%,
+        #fdd835 45%,
+        #f57c00 100%
+      );
+      opacity: 0.88;
+      animation-delay: 0.14s;
+    }
+
+    .bee-honey-flood__wave--3 {
+      background: radial-gradient(
+        circle at 0 0,
+        #fff9c4 0%,
+        #ffee58 38%,
+        #f9a825 95%
+      );
+      opacity: 0.82;
+      animation-delay: 0.28s;
+    }
+
+    @keyframes bee-honey-expand {
+      from {
+        clip-path: circle(0% at 0 0);
+      }
+      to {
+        clip-path: circle(165vmax at 0 0);
+      }
+    }
+
+    .bee-honey-flood.is-active .bee-honey-flood__wave {
+      animation: bee-honey-expand 1.45s cubic-bezier(0.38, 0.02, 0.22, 1) forwards;
+    }
+
+    /* 노랑 퇴장: 오른쪽 아래 모서리로 스르륵 줄어듦 */
+    .bee-honey-flood__shrink {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      background: linear-gradient(
+        158deg,
+        #fffde7 0%,
+        #ffeb3b 36%,
+        #fbc02d 68%,
+        #ef6c00 100%
+      );
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      clip-path: circle(0% at 100% 100%);
+    }
+
+    .bee-honey-flood.is-exiting .bee-honey-flood__wave {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      animation: none !important;
+    }
+
+    @keyframes bee-honey-shrink-br {
+      from {
+        clip-path: circle(185vmax at 100% 100%);
+      }
+      to {
+        clip-path: circle(0% at 100% 100%);
+      }
+    }
+
+    .bee-honey-flood.is-exiting .bee-honey-flood__shrink {
+      visibility: visible;
+      opacity: 1;
+      animation: bee-honey-shrink-br 0.68s cubic-bezier(0.42, 0.12, 0.28, 1) forwards;
+    }
+
+    /* 노랑 퇴장 직전: UI·꽃·벌만 먼저 제거(노란 막 뒤에 메뉴가 잠깐 보이는 현상 방지) */
+    body.sky-only-ui .svg-defs,
+    body.sky-only-ui .bees,
+    body.sky-only-ui .flower-bed,
+    body.sky-only-ui .sky-vines,
+    body.sky-only-ui main.content {
+      display: none !important;
+    }
+
+    /* 최종: 노란 오버레이까지 제거, 하늘·구름만 */
+    body.sky-only .svg-defs,
+    body.sky-only .bees,
+    body.sky-only .flower-bed,
+    body.sky-only .sky-vines,
+    body.sky-only main.content,
+    body.sky-only .bee-honey-flood {
+      display: none !important;
+    }
+
+    /* 노란 화면 이후: 참나무 + 왼쪽 가지 벌집 */
+    .bbatkkot-scene {
+      position: fixed;
+      inset: 0;
+      z-index: 18;
+      pointer-events: none;
+      display: none;
+      overflow: hidden;
+    }
+
+    body.sky-only .bbatkkot-scene {
+      display: block;
+    }
+
+    /* 문 나간 뒤: 하늘에 플레이어 꿀벌만 + 튜토리얼 대화 */
+    body.tutorial-welcome .bees,
+    body.tutorial-welcome main.content,
+    body.tutorial-welcome .flower-bed,
+    body.tutorial-welcome .sky-vines,
+    body.tutorial-welcome .bee-honey-flood,
+    body.tutorial-welcome .bbatkkot-scene {
+      display: none !important;
+    }
+
+    body.tutorial-welcome .player-bee-solo {
+      display: flex !important;
+    }
+
+    body.tutorial-welcome .hive-room {
+      display: none !important;
+    }
+
+    .player-bee-solo {
+      display: none;
+      position: absolute;
+      left: 50%;
+      top: 36%;
+      transform: translate(
+        calc(-50% + var(--bee-x, 0px)),
+        calc(-50% + var(--bee-dy, 0px))
+      );
+      z-index: 6;
+      pointer-events: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .player-bee-solo__float {
+      animation: player-bee-float 3.4s ease-in-out infinite;
+    }
+
+    .player-bee-solo__img {
+      width: min(28vw, 120px);
+      height: auto;
+      display: block;
+      filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.22));
+    }
+
+    @keyframes player-bee-float {
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-14px);
+      }
+    }
+
+    .tutorial-intro {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      align-items: flex-end;
+      justify-content: center;
+      padding: min(8vh, 3rem) clamp(1rem, 4vw, 2rem) max(1.25rem, env(safe-area-inset-bottom, 0px));
+      box-sizing: border-box;
+      pointer-events: none;
+      opacity: 1;
+      transition: opacity 0.65s ease;
+    }
+
+    .tutorial-intro[hidden] {
+      display: none !important;
+    }
+
+    body.tutorial-welcome .tutorial-intro:not([hidden]) {
+      display: flex !important;
+    }
+
+    .tutorial-intro.tutorial-intro--fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .tutorial-intro__panel {
+      pointer-events: auto;
+      width: min(100%, 26rem);
+      padding: 1.25rem 1.35rem 1.5rem;
+      border-radius: 18px;
+      background: rgba(255, 253, 248, 0.94);
+      border: 1px solid rgba(100, 140, 180, 0.35);
+      box-shadow: 0 12px 40px rgba(30, 60, 90, 0.22);
+      text-align: center;
+    }
+
+    .tutorial-intro__line {
+      margin: 0 0 0.55rem;
+      font-size: clamp(1rem, 3.2vw, 1.2rem);
+      color: #283593;
+      font-weight: 600;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      line-height: 1.45;
+    }
+
+    .tutorial-intro__ask {
+      margin-bottom: 1rem !important;
+      color: #000000;
+      font-weight: 700;
+    }
+
+    .tutorial-intro__ask--shake {
+      display: inline-block;
+      animation: tutorial-ask-shake 0.14s ease-in-out infinite;
+    }
+
+    @keyframes tutorial-ask-shake {
+      0%,
+      100% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+      25% {
+        transform: translate(-1.5px, 1px) rotate(-0.9deg);
+      }
+      50% {
+        transform: translate(1.5px, -1px) rotate(0.85deg);
+      }
+      75% {
+        transform: translate(-1px, -1px) rotate(-0.5deg);
+      }
+    }
+
+    .tutorial-intro__actions {
+      display: flex;
+      gap: 1.25rem;
+      justify-content: center;
+      align-items: center;
+      margin-top: 0.25rem;
+    }
+
+    .tutorial-intro__btn {
+      width: 3.25rem;
+      height: 3.25rem;
+      border: none;
+      border-radius: 50%;
+      font-size: 1.35rem;
+      font-weight: 800;
+      line-height: 1;
+      cursor: pointer;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+      transition: transform 0.15s ease;
+    }
+
+    .tutorial-intro__btn:hover {
+      transform: scale(1.08);
+    }
+
+    .tutorial-intro__btn--yes {
+      background: #2e7d32;
+    }
+
+    .tutorial-intro__btn--no {
+      background: #c62828;
+    }
+
+    .tutorial-intro__ok {
+      margin: 0.85rem 0 0;
+      font-size: clamp(1.05rem, 3vw, 1.25rem);
+      font-weight: 700;
+      color: #1565c0;
+    }
+
+    /* 튜토리얼 2단계: 하늘 줌 + 비행 안내 */
+    body.tutorial-welcome--flight .sky {
+      transform: scale(1.82);
+      transform-origin: 50% 36%;
+      transition: transform 0.9s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    body.tutorial-welcome--flight.tutorial-welcome--flight-finale .sky {
+      transform: scale(2.12);
+      transform-origin: 52% 38%;
+      transition: transform 0.85s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    body.tutorial-course-hit .sky {
+      filter: brightness(1.08) saturate(1.08);
+      transition: filter 0.1s ease;
+    }
+
+    .tutorial-flight__panel.tutorial-flight__panel--fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .tutorial-flight__emph-shake {
+      display: inline-block;
+      font-weight: 800;
+      color: #c62828;
+      animation: tutorial-flight-emph-shake 0.14s ease-in-out infinite;
+    }
+
+    @keyframes tutorial-flight-emph-shake {
+      0%,
+      100% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+      25% {
+        transform: translate(-1.5px, 1px) rotate(-0.9deg);
+      }
+      50% {
+        transform: translate(1.5px, -1px) rotate(0.85deg);
+      }
+      75% {
+        transform: translate(-1px, -1px) rotate(-0.5deg);
+      }
+    }
+
+    .tutorial-course {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .tutorial-course[hidden] {
+      display: none !important;
+    }
+
+    .tutorial-obstacle {
+      position: absolute;
+      width: min(18vw, 110px);
+      border-radius: 10px;
+      background: linear-gradient(135deg, #5d4037 0%, #3e2723 55%, #4e342e 100%);
+      box-shadow:
+        inset 0 2px 0 rgba(255, 255, 255, 0.12),
+        0 6px 18px rgba(0, 0, 0, 0.28);
+      border: 2px solid rgba(40, 20, 10, 0.5);
+    }
+
+    .tutorial-obstacle--from-top {
+      top: 0;
+      left: 56%;
+      height: min(46vh, 320px);
+      transform: translateX(-50%);
+    }
+
+    .tutorial-obstacle--from-bottom {
+      bottom: 0;
+      left: 72%;
+      height: min(46vh, 320px);
+      transform: translateX(-50%);
+    }
+
+    .tutorial-flight__finale-ok {
+      margin: 0 0 0.75rem;
+      font-size: clamp(1.15rem, 3.5vw, 1.35rem);
+      font-weight: 800;
+      color: #1565c0;
+    }
+
+    .tutorial-flight {
+      position: fixed;
+      inset: 0;
+      z-index: 56;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: min(10vh, 3rem) clamp(1rem, 4vw, 2rem) 5rem;
+      box-sizing: border-box;
+      pointer-events: none;
+    }
+
+    .tutorial-flight[hidden] {
+      display: none !important;
+    }
+
+    .tutorial-flight:not([hidden]) {
+      display: flex;
+    }
+
+    .tutorial-flight__panel {
+      pointer-events: auto;
+      width: min(100%, 26rem);
+      padding: 1.15rem 1.3rem 1.35rem;
+      border-radius: 18px;
+      background: rgba(255, 253, 248, 0.92);
+      border: 1px solid rgba(100, 140, 180, 0.35);
+      box-shadow: 0 12px 40px rgba(30, 60, 90, 0.2);
+      text-align: center;
+      transition: opacity 0.65s ease;
+    }
+
+    .tutorial-flight__line {
+      margin: 0 0 0.5rem;
+      font-size: clamp(0.98rem, 3vw, 1.15rem);
+      color: #283593;
+      font-weight: 600;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      line-height: 1.42;
+      opacity: 0;
+      transform: translateY(8px);
+      transition:
+        opacity 0.45s ease,
+        transform 0.45s ease;
+    }
+
+    .tutorial-flight__line:last-of-type {
+      margin-bottom: 0.35rem;
+    }
+
+    .tutorial-flight__line.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .tutorial-flight__continue {
+      margin-top: 0.75rem;
+      padding: 0.55rem 1.25rem;
+      border-radius: 999px;
+      border: 1px solid rgba(46, 125, 50, 0.45);
+      background: #e8f5e9;
+      color: #1b5e20;
+      font: inherit;
+      font-size: clamp(0.9rem, 2.6vw, 1rem);
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(30, 80, 40, 0.12);
+    }
+
+    .tutorial-flight__continue:hover {
+      background: #c8e6c9;
+    }
+
+    .tutorial-space-hint {
+      position: fixed;
+      left: 50%;
+      bottom: max(12vh, 5.5rem);
+      z-index: 58;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transform: translateX(-50%);
+      opacity: 0.52;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .tutorial-space-hint[hidden] {
+      display: none !important;
+    }
+
+    .tutorial-space-hint:not([hidden]) {
+      display: flex;
+    }
+
+    .tutorial-space-hint__kbd {
+      font-size: clamp(0.75rem, 2vw, 0.88rem);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: rgba(30, 40, 70, 0.85);
+      font-family: "Segoe UI", system-ui, sans-serif;
+    }
+
+    body.tutorial-welcome--flight .player-bee-solo__float {
+      animation-play-state: paused;
+    }
+
+    .settings-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      box-sizing: border-box;
+      background: rgba(15, 25, 45, 0.45);
+      backdrop-filter: blur(5px);
+    }
+
+    .settings-modal[hidden] {
+      display: none !important;
+    }
+
+    .settings-modal:not([hidden]) {
+      display: flex;
+    }
+
+    .settings-modal__sheet {
+      position: relative;
+      width: min(100%, 22rem);
+      padding: 1.25rem 1.35rem 1.5rem;
+      border-radius: 14px;
+      background: rgba(255, 253, 250, 0.97);
+      border: 1px solid rgba(80, 120, 160, 0.35);
+      box-shadow: 0 14px 44px rgba(20, 40, 70, 0.28);
+      color: #263238;
+      font-family: "Segoe UI", system-ui, sans-serif;
+    }
+
+    .settings-modal__title {
+      margin: 0 0 1rem;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #1565c0;
+    }
+
+    .settings-modal__close {
+      position: absolute;
+      top: 0.65rem;
+      right: 0.65rem;
+      width: 2.25rem;
+      height: 2.25rem;
+      border: none;
+      border-radius: 8px;
+      background: rgba(100, 130, 170, 0.18);
+      color: #37474f;
+      font-size: 1.35rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .settings-modal__close:hover {
+      background: rgba(100, 130, 170, 0.3);
+    }
+
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+    }
+
+    .settings-row__label {
+      font-weight: 600;
+      color: #37474f;
+    }
+
+    .settings-lang-btn {
+      min-width: 7.5rem;
+      padding: 0.45rem 0.85rem;
+      border-radius: 10px;
+      border: 2px solid #90caf9;
+      background: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      color: #1565c0;
+    }
+
+    .settings-lang-btn:hover {
+      background: #e3f2fd;
+    }
+
+    .settings-lang-picker {
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 10px;
+      background: #eceff1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .settings-lang-picker[hidden] {
+      display: none !important;
+    }
+
+    .settings-lang-option {
+      padding: 0.55rem 0.75rem;
+      border: none;
+      border-radius: 8px;
+      background: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .settings-lang-option:hover {
+      background: #e8eaf6;
+    }
+
+    .settings-lang-option.is-current {
+      outline: 2px solid #5c6bc0;
+    }
+
+    .bbatkkot-tree-wrap {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      transform-origin: 19% 40%;
+      width: min(94vw, 540px);
+      height: min(74vh, 580px);
+      transition: transform 1.15s cubic-bezier(0.34, 0.06, 0.23, 1);
+      will-change: transform;
+    }
+
+    /* 0.3초 뒤 클래스 부여 → 벌집(왼쪽 위) 기준으로 확대 */
+    .bbatkkot-tree-wrap.bbatkkot-tree-wrap--zoom-hive {
+      transform: translateX(-50%) scale(2.35);
+    }
+
+    .bbatkkot-tree-wrap svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+
+    /* 벌집 방: 침대·아기·할머니 (확대 0.3초 후 표시) */
+    .hive-room {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: none;
+      pointer-events: none;
+      align-items: center;
+      justify-content: center;
+      padding: min(2vh, 1rem);
+      box-sizing: border-box;
+      background: #1a0f0a;
+      overflow: visible;
+    }
+
+    body.hive-room-active .hive-room {
+      display: flex;
+    }
+
+    body.hive-room-active .bbatkkot-scene {
+      display: none !important;
+    }
+
+    body.hive-room-active .sky {
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.45s ease, visibility 0s linear 0.45s;
+    }
+
+    .hive-room-view {
+      position: relative;
+      flex-shrink: 0;
+      width: min(96vw, 920px);
+      height: min(88vh, 720px);
+      max-height: 100%;
+      overflow: visible;
+      transform-origin: 50% 50%;
+      transition: transform 1.25s cubic-bezier(0.33, 1, 0.68, 1);
+      transform: scale3d(1, 1, 1);
+      will-change: transform;
+    }
+
+    .hive-room-view.hive-room-view--map-zoom {
+      transform: scale3d(2.55, 2.55, 1);
+      transform-origin: 92% 9%;
+    }
+
+    .hive-room-zoom-wrap {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      transition: transform 1.35s cubic-bezier(0.33, 1, 0.68, 1);
+      transform-origin: 52.2% 74%;
+      transform: scale3d(1, 1, 1);
+      will-change: transform;
+    }
+
+    .hive-room-zoom-wrap.hive-room-zoom-wrap--baby {
+      transform: scale3d(2.35, 2.35, 1);
+    }
+
+    .hive-room-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      max-height: 100%;
+      filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.35));
+    }
+
+    .hive-baby-dialog {
+      position: absolute;
+      left: 50%;
+      bottom: 6%;
+      transform: translateX(-50%);
+      z-index: 4;
+      max-width: min(94vw, 24rem);
+      pointer-events: none;
+    }
+
+    .hive-baby-dialog__bubble {
+      padding: 0.7rem 1.05rem;
+      border-radius: 16px;
+      background: rgba(255, 249, 230, 0.96);
+      border: 2px solid #ffe082;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.38);
+      color: #3e2723;
+      font-size: clamp(0.95rem, 2.7vw, 1.12rem);
+      line-height: 1.45;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      text-align: center;
+    }
+
+    .hive-baby-dialog__line {
+      margin: 0;
+      opacity: 0;
+    }
+
+    .hive-baby-dialog__line--2 {
+      margin-top: 0.45rem;
+    }
+
+    .hive-baby-dialog--visible .hive-baby-dialog__line--1 {
+      animation: hive-baby-line-in 0.42s ease forwards;
+    }
+
+    .hive-baby-dialog--visible .hive-baby-dialog__line--2 {
+      animation: hive-baby-line-in 0.48s ease 0.32s forwards;
+    }
+
+    @keyframes hive-baby-line-in {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hive-map-gain {
+      position: absolute;
+      left: 50%;
+      bottom: 10%;
+      transform: translateX(-50%);
+      z-index: 7;
+      max-width: min(92vw, 20rem);
+      pointer-events: none;
+      text-align: center;
+    }
+
+    .hive-map-gain__text {
+      margin: 0;
+      padding: 0.55rem 1rem;
+      border-radius: 12px;
+      background: rgba(255, 249, 230, 0.95);
+      border: 2px solid #ffe082;
+      color: #3e2723;
+      font-size: clamp(0.95rem, 2.8vw, 1.12rem);
+      font-weight: 600;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
+    }
+
+    .hive-map-hud {
+      position: absolute;
+      top: max(0.45rem, env(safe-area-inset-top, 0px));
+      right: max(0.45rem, env(safe-area-inset-right, 0px));
+      z-index: 8;
+      width: 3.35rem;
+      height: 3.35rem;
+      padding: 0;
+      border: 2px solid #8d6e63;
+      border-radius: 14px;
+      background: linear-gradient(160deg, #fffde7, #ffecb3);
+      color: #4e342e;
+      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.38);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: auto;
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+    }
+
+    .hive-map-hud:hover {
+      transform: scale(1.06);
+      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.42);
+    }
+
+    .hive-map-hud[hidden] {
+      display: none !important;
+    }
+
+    .hive-map-hud:not([hidden]) {
+      display: flex;
+      animation: hive-map-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    @keyframes hive-map-pop {
+      from {
+        opacity: 0;
+        transform: scale(0.7);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .hive-room__stage {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: auto;
+      overflow: visible;
+    }
+
+    .hive-shelf-note {
+      cursor: pointer;
+    }
+
+    .hive-shelf-note:focus {
+      outline: none;
+    }
+
+    .hive-shelf-note:focus-visible rect,
+    .hive-shelf-note:focus-visible path {
+      stroke: #ffc107;
+      stroke-width: 2;
+    }
+
+    .hive-note-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 55;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(0.75rem, 3vw, 1.5rem);
+      box-sizing: border-box;
+      background: rgba(10, 6, 4, 0.62);
+      backdrop-filter: blur(4px);
+    }
+
+    .hive-note-modal[hidden] {
+      display: none !important;
+    }
+
+    .hive-note-modal:not([hidden]) {
+      display: flex;
+    }
+
+    .hive-note-modal__sheet {
+      position: relative;
+      width: min(100%, 26rem);
+      max-height: min(84vh, 36rem);
+      overflow: auto;
+      padding: clamp(1.1rem, 3vw, 1.6rem) clamp(1.25rem, 4vw, 2rem);
+      border-radius: 4px;
+      background:
+        linear-gradient(145deg, rgba(255, 253, 245, 0.97), rgba(250, 242, 224, 0.98));
+      border: 1px solid #bcaaa4;
+      box-shadow:
+        0 4px 0 #8d6e63,
+        0 12px 40px rgba(0, 0, 0, 0.45);
+      color: #3e2723;
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: clamp(0.92rem, 2.5vw, 1.05rem);
+      line-height: 1.65;
+    }
+
+    .hive-note-modal__close {
+      position: sticky;
+      top: 0;
+      float: right;
+      margin: -0.35rem -0.35rem 0.25rem 0.5rem;
+      width: 2.25rem;
+      height: 2.25rem;
+      padding: 0;
+      border: none;
+      border-radius: 4px;
+      background: rgba(141, 110, 99, 0.2);
+      color: #5d4037;
+      font-size: 1.45rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .hive-note-modal__close:hover {
+      background: rgba(141, 110, 99, 0.35);
+    }
+
+    .hive-note-modal__title {
+      margin: 0 0 0.75rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      color: #6d4c41;
+      letter-spacing: 0.04em;
+    }
+
+    .hive-note-modal__body {
+      margin: 0;
+      clear: both;
+      white-space: pre-line;
+    }
+
+    .hive-note-emph {
+      color: #b71c1c;
+      font-weight: 700;
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 3px;
+      text-shadow: 0 0 1px rgba(183, 28, 28, 0.25);
+    }
+
+    .hive-note-modal__en {
+      font-size: 0.82em;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      color: #6d4c41;
+    }
+
+    .hive-story {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 2;
+      max-height: 46vh;
+      overflow-y: auto;
+      padding: 0.75rem clamp(0.75rem, 3vw, 1.5rem) 1.25rem;
+      background: linear-gradient(
+        180deg,
+        transparent 0%,
+        rgba(26, 15, 10, 0.72) 28%,
+        rgba(12, 8, 6, 0.92) 100%
+      );
+      pointer-events: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .hive-story__inner {
+      max-width: 36rem;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .hive-story__p {
+      margin: 0 0 0.65em;
+      font-size: clamp(0.95rem, 2.4vw, 1.15rem);
+      line-height: 1.55;
+      color: #fff9e6;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+      animation: hive-story-line-in 0.55s ease-out both;
+    }
+
+    .hive-story__p:last-child {
+      margin-bottom: 0;
+    }
+
+    .hive-story__emph {
+      color: #ff1744;
+      font-weight: 800;
+      text-shadow:
+        0 0 14px rgba(255, 23, 68, 0.45),
+        0 1px 2px rgba(0, 0, 0, 0.9);
+    }
+
+    .hive-story__emph--shake {
+      display: inline-block;
+      animation: hive-story-shake 0.14s ease-in-out infinite;
+      will-change: transform;
+    }
+
+    @keyframes hive-story-shake {
+      0%,
+      100% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+      25% {
+        transform: translate(-2px, 1px) rotate(-1.1deg);
+      }
+      50% {
+        transform: translate(2px, -1px) rotate(1deg);
+      }
+      75% {
+        transform: translate(-1px, -1px) rotate(-0.6deg);
+      }
+    }
+
+    @keyframes hive-story-line-in {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    #hr-exit-door {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    body.hive-room-has-door #hr-exit-door {
+      visibility: visible;
+      pointer-events: all;
+      cursor: pointer;
+    }
+
+    body.hive-room-has-door #hr-exit-door:focus {
+      outline: 2px solid #ffc107;
+      outline-offset: 4px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hive-story__p {
+        animation: none;
+      }
+      .hive-story__emph--shake {
+        animation: none;
+      }
+      .hive-room-zoom-wrap,
+      .hive-room-view {
+        transition-duration: 0.05s;
+      }
+      .hive-baby-dialog--visible .hive-baby-dialog__line--1,
+      .hive-baby-dialog--visible .hive-baby-dialog__line--2 {
+        animation: none;
+        opacity: 1;
+        transform: none;
+      }
+      .hive-map-hud:not([hidden]) {
+        animation: none;
+        opacity: 1;
+        transform: none;
+      }
+      .tutorial-intro__ask--shake {
+        animation: none;
+      }
+      .tutorial-flight__emph-shake {
+        animation: none;
+      }
+      .player-bee-solo__float {
+        animation: none;
+      }
+    }
+
+    @keyframes bee-drift-east {
+      0% {
+        margin-left: -18vw;
+      }
+      100% {
+        margin-left: 100vw;
+      }
+    }
+
+    .bee-slot {
+      position: absolute;
+      width: 0;
+      height: 0;
+      left: var(--bx, 50%);
+      top: var(--by, 40%);
+      animation: bee-drift-east var(--drift-t, 92s) linear infinite;
+      animation-delay: var(--drift-delay, 0s);
+    }
+
+    .bee-orbit {
+      width: 0;
+      height: 0;
+      animation: bee-spin var(--bee-t, 11s) linear infinite;
+      animation-delay: var(--bee-delay, 0s);
+      will-change: transform;
+    }
+
+    /* 반지름만 bee-arm이 옮기고, 스프라이트는 역회전 + 원근 스케일(아래=가까움=큼, 위=멀음=작음) */
+    .bee-arm {
+      transform: translateX(var(--bee-r, 72px));
+    }
+
+    .bee-depth-orbit {
+      transform-origin: 50% 50%;
+      animation: bee-depth-orbit var(--bee-t, 11s) linear infinite;
+      animation-delay: var(--bee-delay, 0s);
+    }
+
+    @keyframes bee-depth-orbit {
+      0% {
+        transform: scale(0.95);
+      }
+      25% {
+        transform: scale(1.32);
+      }
+      50% {
+        transform: scale(0.95);
+      }
+      75% {
+        transform: scale(0.64);
+      }
+      100% {
+        transform: scale(0.95);
+      }
+    }
+
+    .bee-orbit .bee-sprite {
+      display: block;
+      width: clamp(44px, 10.5vmin, 96px);
+      height: auto;
+      animation: bee-spin var(--bee-t, 11s) linear infinite reverse;
+      animation-delay: var(--bee-delay, 0s);
+      filter: drop-shadow(0 3px 5px rgba(40, 30, 10, 0.32));
+    }
+
+    @keyframes bee-spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .bee-path8 {
+      position: absolute;
+      left: var(--bx, 60%);
+      top: var(--by, 20%);
+      width: 0;
+      height: 0;
+      animation-name: bee-figure8, bee-drift-east;
+      animation-duration: var(--bee-t, 14s), var(--drift-t, 92s);
+      animation-timing-function: ease-in-out, linear;
+      animation-iteration-count: infinite, infinite;
+      animation-delay: var(--bee-delay, 0s), var(--drift-delay, 0s);
+      will-change: transform, margin;
+    }
+
+    .bee-depth-path8 {
+      transform-origin: 50% 50%;
+      animation: bee-depth-8 var(--bee-t, 14s) ease-in-out infinite;
+      animation-delay: var(--bee-delay, 0s);
+    }
+
+    @keyframes bee-depth-8 {
+      0% {
+        transform: scale(1.15);
+      }
+      12.5% {
+        transform: scale(0.66);
+      }
+      25% {
+        transform: scale(0.72);
+      }
+      37.5% {
+        transform: scale(0.66);
+      }
+      50% {
+        transform: scale(1.15);
+      }
+      62.5% {
+        transform: scale(0.66);
+      }
+      75% {
+        transform: scale(0.72);
+      }
+      87.5% {
+        transform: scale(0.66);
+      }
+      100% {
+        transform: scale(1.15);
+      }
+    }
+
+    .bee-path8 .bee-sprite {
+      display: block;
+      width: clamp(44px, 10.5vmin, 96px);
+      height: auto;
+      filter: drop-shadow(0 3px 5px rgba(40, 30, 10, 0.32));
+    }
+
+    @keyframes bee-figure8 {
+      0% {
+        transform: translate(0, 0) rotate(-12deg);
+      }
+      12.5% {
+        transform: translate(calc(var(--8w, 55px) * 0.5), calc(var(--8h, 38px) * -1)) rotate(8deg);
+      }
+      25% {
+        transform: translate(var(--8w, 55px), 0) rotate(18deg);
+      }
+      37.5% {
+        transform: translate(calc(var(--8w, 55px) * 0.5), var(--8h, 38px)) rotate(4deg);
+      }
+      50% {
+        transform: translate(0, 0) rotate(-10deg);
+      }
+      62.5% {
+        transform: translate(calc(var(--8w, 55px) * -0.5), calc(var(--8h, 38px) * -1)) rotate(-18deg);
+      }
+      75% {
+        transform: translate(calc(var(--8w, 55px) * -1), 0) rotate(-6deg);
+      }
+      87.5% {
+        transform: translate(calc(var(--8w, 55px) * -0.5), var(--8h, 38px)) rotate(-14deg);
+      }
+      100% {
+        transform: translate(0, 0) rotate(-12deg);
+      }
+    }
+
+    /* 하단 꽃밭 — 단색 꽃잎 + 사진 느낌(그림자), 바람 흔들림 */
+    .flower-bed {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: clamp(220px, 44vh, 520px);
+      z-index: 1;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .plant {
+      position: absolute;
+      bottom: 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      transform-origin: 50% 100%;
+      margin-left: var(--overlap, 0);
+      z-index: var(--z, 1);
+      animation: plant-sway var(--dur, 4.2s) ease-in-out infinite;
+      animation-delay: var(--delay, 0s);
+    }
+
+    .plant svg {
+      display: block;
+      overflow: visible;
+      width: auto;
+      height: clamp(150px, 32vmin, 300px);
+    }
+
+    .plant--toxic svg {
+      height: clamp(185px, 38vmin, 360px);
+    }
+
+    @keyframes plant-sway {
+      0%, 100% {
+        transform: rotate(calc(var(--tilt, 5deg) * -1)) translateX(-5px);
+      }
+      50% {
+        transform: rotate(var(--tilt, 5deg)) translateX(7px);
+      }
+    }
+
+    @keyframes plant-sway-alt {
+      0%, 100% {
+        transform: rotate(7deg) translateX(6px);
+      }
+      33% {
+        transform: rotate(-9deg) translateX(-8px);
+      }
+      66% {
+        transform: rotate(4deg) translateX(4px);
+      }
+    }
+
+    .plant--b {
+      animation-name: plant-sway-alt;
+      animation-duration: var(--dur, 5s);
+    }
+
+    /* 독성 — 짙은 남색 + 흐릿한 냄새(블러 덩어리) */
+    .stink-puff {
+      animation: stink-waft var(--st-dur, 2.8s) ease-in-out infinite;
+      transform-origin: 50% 100%;
+    }
+
+    .stink-puff:nth-child(2) {
+      animation-delay: 0.45s;
+    }
+
+    .stink-puff:nth-child(3) {
+      animation-delay: 0.9s;
+    }
+
+    .svg-defs {
+      position: absolute;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+    }
+
+    .sky-vines {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* 덩굴: 화면 위에서 매달려 아래로 */
+    .sky-vine {
+      position: absolute;
+      top: 0;
+      bottom: auto;
+      width: clamp(72px, 14vmin, 130px);
+      height: min(58vh, 480px);
+      opacity: 0.9;
+      align-items: flex-start;
+      transform-origin: 50% 0%;
+    }
+
+    .sky-vine.plant {
+      display: flex;
+      transform-origin: 50% 0%;
+    }
+
+    .sky-vine--l {
+      left: 0;
+    }
+
+    .sky-vine--r {
+      right: 0;
+    }
+
+    .sky-vine svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+
+    .sky-vine-mini {
+      position: absolute;
+      left: 50%;
+      margin-left: clamp(-40px, -5vmin, -26px);
+      top: 0;
+      width: clamp(48px, 10vmin, 80px);
+      height: min(32vh, 280px);
+      opacity: 0.85;
+    }
+
+    .sky-vine-mini svg {
+      animation: plant-sway 4s ease-in-out infinite;
+      animation-delay: -0.5s;
+      transform-origin: 50% 0%;
+    }
+
+    @keyframes stink-waft {
+      0%, 100% {
+        opacity: 0.45;
+        transform: translateY(2px) rotate(-6deg);
+      }
+      50% {
+        opacity: 1;
+        transform: translateY(-10px) rotate(10deg);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .plant,
+      .sky-vine svg,
+      .sky-vine-mini svg,
+      .stink-puff,
+      .bees.bees--start-dash,
+      .bees.bees--offscreen {
+        animation: none !important;
+        transform: none !important;
+      }
+      .bee-slot,
+      .bee-orbit,
+      .bee-path8,
+      .bee-depth-orbit,
+      .bee-depth-path8 {
+        animation: none !important;
+      }
+      .bee-orbit .bee-sprite {
+        animation: none !important;
+      }
+      .plant {
+        transform: none;
+      }
+      .bee-orbit,
+      .bee-path8 {
+        transform: none;
+      }
+      .bee-slot,
+      .bee-path8 {
+        margin-left: 0 !important;
+      }
+      .bee-depth-orbit,
+      .bee-depth-path8 {
+        transform: none;
+      }
+      .bee-honey-flood.is-active .bee-honey-flood__wave {
+        animation: none !important;
+        clip-path: inset(0) !important;
+        opacity: 1;
+      }
+      .bee-honey-flood.is-exiting .bee-honey-flood__shrink {
+        animation: none !important;
+        clip-path: circle(0% at 100% 100%) !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+      .bbatkkot-tree-wrap {
+        transition: none !important;
+      }
+      .bbatkkot-tree-wrap.bbatkkot-tree-wrap--zoom-hive {
+        transform: translateX(-50%) scale(2.35) !important;
+      }
+      .sky {
+        transition: none !important;
+      }
+      body.bbatkkot-hive-inside .sky {
+        transition: none !important;
+      }
+      body.bbatkkot-hive-inside .clouds,
+      body.bbatkkot-hive-inside .clouds-back {
+        transition: none !important;
+      }
+      body.hive-room-active .sky {
+        transition: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+    }
+
+    /* 전경 콘텐츠 자리 */
+    .content {
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: clamp(1rem, 4vh, 2rem) 1rem;
+      color: #2c5282;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      text-align: center;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+    }
+
+    .content-stack {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: min(56rem, 100%);
+      min-height: 0;
+    }
+
+    .menu-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 0;
+    }
+
+    .content h1 {
+      font-size: clamp(2.25rem, 12vw, 5.5rem);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      flex-shrink: 0;
+    }
+
+    .menu-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+      width: 100%;
+      max-width: min(96vw, 52rem);
+      padding: 0;
+      background: none;
+      border: none;
+      box-shadow: none;
+      text-shadow: none;
+    }
+
+    .menu-panel .menu-item {
+      display: block;
+      width: 100%;
+      margin: 0;
+      padding: 1rem 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 1.25rem;
+      background: #eef6fb;
+      color: #234e70;
+      font: inherit;
+      font-size: clamp(0.95rem, 3vw, 1.1rem);
+      font-weight: 600;
+      line-height: 1.35;
+      text-align: center;
+      cursor: pointer;
+      word-break: keep-all;
+      box-shadow:
+        0 4px 20px rgba(30, 80, 120, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.85);
+      transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+    }
+
+    .menu-panel .menu-item:hover {
+      background: #f5f9fc;
+      color: #1a3d5c;
+      box-shadow:
+        0 6px 24px rgba(30, 80, 120, 0.14),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+
+    .menu-panel .menu-item:active {
+      background: #e4eef6;
+      transform: scale(0.99);
+    }
+  </style>
+</head>
+<body>
+  <svg class="svg-defs" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="stem-photo" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#5c9e4a"/>
+        <stop offset="100%" stop-color="#2d4a28"/>
+      </linearGradient>
+      <filter id="flower-drop" x="-35%" y="-35%" width="170%" height="170%">
+        <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000" flood-opacity="0.28"/>
+      </filter>
+      <filter id="smell-blur" x="-60%" y="-60%" width="220%" height="220%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="9"/>
+      </filter>
+    </defs>
+  </svg>
+  <div class="sky" aria-hidden="true">
+    <div class="clouds clouds-back">
+      <div class="cloud c1"></div>
+      <div class="cloud c2"></div>
+    </div>
+    <div class="clouds">
+      <div class="cloud c1"></div>
+      <div class="cloud c2"></div>
+      <div class="cloud c3"></div>
+      <div class="cloud c4"></div>
+      <div class="cloud c5"></div>
+    </div>
+    <div class="bees" aria-hidden="true">
+      <div class="bee-slot" style="--bx: 12%; --by: 22%; --bee-r: min(12vw, 90px); --bee-t: 14s; --bee-delay: -2s; --drift-t: 96s; --drift-delay: -12s">
+        <div class="bee-orbit"><div class="bee-arm"><div class="bee-depth-orbit"><img class="bee-sprite" src="BEEE/BEEs.png" alt="" decoding="async"/></div></div></div>
+      </div>
+      <div class="bee-slot" style="--bx: 78%; --by: 18%; --bee-r: min(10vw, 76px); --bee-t: 11s; --bee-delay: -7s; --drift-t: 82s; --drift-delay: -48s">
+        <div class="bee-orbit"><div class="bee-arm"><div class="bee-depth-orbit"><img class="bee-sprite" src="BEEE/BEEs.png" alt="" decoding="async"/></div></div></div>
+      </div>
+      <div class="bee-slot" style="--bx: 44%; --by: 12%; --bee-r: min(8vw, 64px); --bee-t: 9s; --bee-delay: -1s; --drift-t: 108s; --drift-delay: -3s">
+        <div class="bee-orbit"><div class="bee-arm"><div class="bee-depth-orbit"><img class="bee-sprite" src="BEEE/BEEs.png" alt="" decoding="async"/></div></div></div>
+      </div>
+      <div class="bee-slot" style="--bx: 28%; --by: 48%; --bee-r: min(14vw, 100px); --bee-t: 18s; --bee-delay: -4s; --drift-t: 90s; --drift-delay: -62s">
+        <div class="bee-orbit"><div class="bee-arm"><div class="bee-depth-orbit"><img class="bee-sprite" src="BEEE/BEEs.png" alt="" decoding="async"/></div></div></div>
+      </div>
+      <div class="bee-path8" style="--bx: 62%; --by: 38%; --8w: min(16vw, 100px); --8h: min(9vw, 52px); --bee-t: 16s; --bee-delay: -3s; --drift-t: 88s; --drift-delay: -28s">
+        <div class="bee-depth-path8"><img class="bee-sprite" src="BEEE/BEEs.png" alt="" decoding="async"/></div>
+      </div>
+      <div class="bee-path8" style="--bx: 18%; --by: 58%; --8w: min(14vw, 88px); --8h: min(8vw, 46px); --bee-t: 19s; --bee-delay: -10s; --drift-t: 100s; --drift-delay: -74s">
+        <div class="bee-depth-path8"><img class="bee-sprite" src="BEEE/BEEs.png" alt="" decoding="async"/></div>
+      </div>
+    </div>
+    <div
+      class="player-bee-solo"
+      id="playerBeeSolo"
+      hidden
+      aria-hidden="true"
+    >
+      <div class="player-bee-solo__float">
+        <img
+          class="player-bee-solo__img"
+          src="BEEE/BEEs.png"
+          alt=""
+          width="112"
+          height="112"
+          decoding="async"
+        />
+      </div>
+    </div>
+    <div
+      class="tutorial-course"
+      id="tutorialCourse"
+      hidden
+      aria-hidden="true"
+    >
+      <div
+        class="tutorial-obstacle tutorial-obstacle--from-top"
+        id="tutorialObsTop"
+      ></div>
+      <div
+        class="tutorial-obstacle tutorial-obstacle--from-bottom"
+        id="tutorialObsBottom"
+      ></div>
+    </div>
+  </div>
+
+  <div class="flower-bed" aria-hidden="true">
+    <!-- 6송이만: 양쪽에 몰고 가운데(약 35–54%) 비움 · 살짝 겹침 -->
+    <div class="plant plant--b" style="left: 3%; --overlap: 0; --z: 2; --dur: 3.8s; --delay: -0.5s; --tilt: 6deg">
+      <svg viewBox="0 0 84 120" width="84" height="120">
+        <g transform="translate(42,56) skewX(-5.5deg) scale(0.97,1) translate(-42,-56)">
+          <path d="M37.5 56 L35 118 L49 118 L46.5 56 Z" fill="url(#stem-photo)" stroke="#1e3a18" stroke-width="0.75"/>
+          <g filter="url(#flower-drop)">
+            <g transform="translate(42,56)">
+              <g transform="scale(0.64,0.4)">
+                <g transform="rotate(-5deg)">
+                  <g transform="translate(0,-6)">
+              <g fill="#c62828">
+                <ellipse cx="0" cy="-22" rx="13" ry="24"/><ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(72)"/>
+                <ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(144)"/><ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(216)"/>
+                <ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(288)"/>
+              </g>
+              <circle cx="0" cy="0" r="10" fill="#ffccbc"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+      </svg>
+    </div>
+    <div class="plant" style="left: 11%; --overlap: -28px; --z: 4; --dur: 4.6s; --delay: -1.2s; --tilt: 5deg">
+      <svg viewBox="0 0 84 120" width="84" height="120">
+        <g transform="translate(42,56) skewX(4.5deg) scale(0.97,1) translate(-42,-56)">
+          <path d="M37.5 56 L35 118 L49 118 L46.5 56 Z" fill="url(#stem-photo)" stroke="#1e3a18" stroke-width="0.75"/>
+          <g filter="url(#flower-drop)">
+            <g transform="translate(42,56)">
+              <g transform="scale(0.64,0.4)">
+                <g transform="rotate(-5deg)">
+                  <g transform="translate(0,-6)">
+              <g fill="#f9a825">
+                <ellipse cx="0" cy="-22" rx="13" ry="24"/><ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(72)"/>
+                <ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(144)"/><ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(216)"/>
+                <ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(288)"/>
+              </g>
+              <circle cx="0" cy="0" r="10" fill="#fff8e1"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+      </svg>
+    </div>
+    <div class="plant plant--toxic plant--b" style="left: 21%; --overlap: -34px; --z: 3; --dur: 5.2s; --delay: -0.8s; --tilt: 4deg">
+      <svg viewBox="-6 -58 96 160" width="96" height="160">
+        <g transform="translate(42,56) skewX(-6deg) scale(0.96,1) translate(-42,-56)">
+          <path d="M40.5 56 L38 126 L54 126 L51.5 56 Z" fill="url(#stem-photo)" stroke="#1e3a18" stroke-width="0.75"/>
+          <g filter="url(#flower-drop)">
+            <g transform="translate(42,56)">
+              <g transform="scale(0.64,0.4)">
+                <g transform="rotate(-5deg)">
+                  <g transform="translate(0,-17)">
+              <ellipse cx="0" cy="-1" rx="34" ry="23" fill="#1a237e"/><ellipse cx="0" cy="1" rx="19" ry="13" fill="#0d1240"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+          <g class="stink-puff"><ellipse cx="30" cy="-2" rx="9" ry="22" fill="#0d1642" opacity="0.55" filter="url(#smell-blur)"/></g>
+          <g class="stink-puff"><ellipse cx="48" cy="-6" rx="10" ry="26" fill="#0d1642" opacity="0.5" filter="url(#smell-blur)"/></g>
+          <g class="stink-puff"><ellipse cx="38" cy="-22" rx="14" ry="18" fill="#15244d" opacity="0.45" filter="url(#smell-blur)"/></g>
+        </g>
+      </svg>
+    </div>
+    <div class="plant plant--b" style="left: 56%; --overlap: -30px; --z: 4; --dur: 3.6s; --delay: -2s; --tilt: 7deg">
+      <svg viewBox="0 0 84 120" width="84" height="120">
+        <g transform="translate(42,56) skewX(-4deg) scale(0.98,1) translate(-42,-56)">
+          <path d="M37.5 56 L35 118 L49 118 L46.5 56 Z" fill="url(#stem-photo)" stroke="#1e3a18" stroke-width="0.75"/>
+          <g filter="url(#flower-drop)">
+            <g transform="translate(42,56)">
+              <g transform="scale(0.64,0.4)">
+                <g transform="rotate(-5deg)">
+                  <g transform="translate(0,-6)">
+              <g fill="#ec407a">
+                <ellipse cx="0" cy="-22" rx="13" ry="24"/><ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(72)"/>
+                <ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(144)"/><ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(216)"/>
+                <ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(288)"/>
+              </g>
+              <circle cx="0" cy="0" r="10" fill="#fce4ec"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+      </svg>
+    </div>
+    <div class="plant" style="left: 69%; --overlap: -32px; --z: 2; --dur: 4.5s; --delay: -1.7s; --tilt: 7deg">
+      <svg viewBox="0 0 84 120" width="84" height="120">
+        <g transform="translate(42,56) skewX(5deg) scale(0.97,1) translate(-42,-56)">
+          <path d="M37.5 56 L35 118 L49 118 L46.5 56 Z" fill="url(#stem-photo)" stroke="#1e3a18" stroke-width="0.75"/>
+          <g filter="url(#flower-drop)">
+            <g transform="translate(42,56)">
+              <g transform="scale(0.64,0.4)">
+                <g transform="rotate(-5deg)">
+                  <g transform="translate(0,-6)">
+              <g fill="#fbc02d">
+                <ellipse cx="0" cy="-22" rx="13" ry="24"/><ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(72)"/>
+                <ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(144)"/><ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(216)"/>
+                <ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(288)"/>
+              </g>
+              <circle cx="0" cy="0" r="10" fill="#fffde7"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+      </svg>
+    </div>
+    <div class="plant plant--b" style="left: 82%; --overlap: -26px; --z: 3; --dur: 4.1s; --delay: -2.4s; --tilt: 6deg">
+      <svg viewBox="0 0 84 120" width="84" height="120">
+        <g transform="translate(42,56) skewX(-4.5deg) scale(0.97,1) translate(-42,-56)">
+          <path d="M37.5 56 L35 118 L49 118 L46.5 56 Z" fill="url(#stem-photo)" stroke="#1e3a18" stroke-width="0.75"/>
+          <g filter="url(#flower-drop)">
+            <g transform="translate(42,56)">
+              <g transform="scale(0.64,0.4)">
+                <g transform="rotate(-5deg)">
+                  <g transform="translate(0,-6)">
+              <g fill="#7b1fa2">
+                <ellipse cx="0" cy="-22" rx="13" ry="24"/><ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(72)"/>
+                <ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(144)"/><ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(216)"/>
+                <ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(288)"/>
+              </g>
+              <circle cx="0" cy="0" r="10" fill="#f3e5f5"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <div class="sky-vines" aria-hidden="true">
+    <div class="sky-vine sky-vine--l plant plant--b" style="--dur: 5s; --delay: -1s; --tilt: 5deg">
+      <svg viewBox="0 0 100 560" preserveAspectRatio="xMidYMin meet">
+        <path d="M52 0 Q36 200 48 380 Q42 480 50 536" fill="none" stroke="#254d20" stroke-width="4" stroke-linecap="round"/>
+        <path d="M52 0 Q36 200 48 380 Q42 480 50 536" fill="none" stroke="url(#stem-photo)" stroke-width="2.5" stroke-linecap="round" opacity="0.95"/>
+        <g transform="translate(50,528) scale(0.32)" filter="url(#flower-drop)">
+          <g transform="translate(42,56)">
+            <g transform="scale(0.64,0.4)">
+              <g transform="rotate(-5deg)">
+                <g transform="translate(0,-6)">
+            <g fill="#e53935">
+              <ellipse cx="0" cy="-22" rx="13" ry="24"/><ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(72)"/>
+              <ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(144)"/><ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(216)"/>
+              <ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(288)"/>
+            </g>
+            <circle cx="0" cy="0" r="10" fill="#ffccbc"/>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+      </svg>
+    </div>
+    <div class="sky-vine sky-vine--r plant" style="--dur: 4.4s; --delay: -2s; --tilt: 5deg">
+      <svg viewBox="0 0 100 560" preserveAspectRatio="xMidYMin meet">
+        <path d="M48 0 Q64 200 52 380 Q58 480 50 536" fill="none" stroke="#254d20" stroke-width="4" stroke-linecap="round"/>
+        <path d="M48 0 Q64 200 52 380 Q58 480 50 536" fill="none" stroke="url(#stem-photo)" stroke-width="2.5" stroke-linecap="round" opacity="0.95"/>
+        <g transform="translate(50,528) scale(0.32)" filter="url(#flower-drop)">
+          <g transform="translate(42,56)">
+            <g transform="scale(0.64,0.4)">
+              <g transform="rotate(-5deg)">
+                <g transform="translate(0,-6)">
+            <g fill="#fbc02d">
+              <ellipse cx="0" cy="-22" rx="13" ry="24"/><ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(72)"/>
+              <ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(144)"/><ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(216)"/>
+              <ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(288)"/>
+            </g>
+            <circle cx="0" cy="0" r="10" fill="#fffde7"/>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+      </svg>
+    </div>
+    <div class="sky-vine-mini" style="--tilt: 4deg">
+      <svg viewBox="0 0 64 280" preserveAspectRatio="xMidYMin meet">
+        <path d="M32 4 Q26 140 32 268" fill="none" stroke="#254d20" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M32 4 Q26 140 32 268" fill="none" stroke="url(#stem-photo)" stroke-width="2.2" stroke-linecap="round"/>
+        <g transform="translate(32,262) scale(0.28)" filter="url(#flower-drop)">
+          <g transform="translate(42,56)">
+            <g transform="scale(0.64,0.4)">
+              <g transform="rotate(-5deg)">
+                <g transform="translate(0,-6)">
+            <g fill="#ec407a">
+              <ellipse cx="0" cy="-22" rx="13" ry="24"/><ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(72)"/>
+              <ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(144)"/><ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(216)"/>
+              <ellipse cx="0" cy="-22" rx="13" ry="24" transform="rotate(288)"/>
+            </g>
+            <circle cx="0" cy="0" r="10" fill="#fce4ec"/>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <main class="content">
+    <div class="content-stack">
+      <h1>BEEEEEE!</h1>
+      <div class="menu-wrap">
+        <nav
+          class="menu-panel"
+          data-i18n-attr="aria-label|menu.mainNavAria"
+          aria-label="메인 메뉴"
+        >
+          <button type="button" class="menu-item" id="btn-start" data-i18n="menu.start">
+            시작하기
+          </button>
+          <button type="button" class="menu-item" id="btn-settings" data-i18n="menu.settings">
+            설정
+          </button>
+          <button type="button" class="menu-item" id="btn-howto" data-i18n="menu.howToPlay">
+            어떻게 플레이하지?
+          </button>
+        </nav>
+      </div>
+    </div>
+  </main>
+  <div
+    class="tutorial-intro"
+    id="tutorialIntro"
+    hidden
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="tutorialIntroL1"
+  >
+    <div class="tutorial-intro__panel">
+      <p id="tutorialIntroL1" class="tutorial-intro__line" data-i18n="tutorial.l1">
+        안녕하세요 플레이어분!
+      </p>
+      <p
+        class="tutorial-intro__line tutorial-intro__ask tutorial-intro__ask--shake"
+        id="tutorialIntroL2"
+        data-i18n="tutorial.l2"
+      >
+        튜토리얼을 시작할까요?
+      </p>
+      <div class="tutorial-intro__actions" id="tutorialIntroActions">
+        <button
+          type="button"
+          class="tutorial-intro__btn tutorial-intro__btn--yes"
+          id="tutorialIntroYes"
+          data-i18n-attr="aria-label|tutorial.yesAria"
+          aria-label="예, 튜토리얼 시작"
+        >
+          ✓
+        </button>
+        <button
+          type="button"
+          class="tutorial-intro__btn tutorial-intro__btn--no"
+          id="tutorialIntroNo"
+          data-i18n-attr="aria-label|tutorial.noAria"
+          aria-label="아니오"
+        >
+          ✕
+        </button>
+      </div>
+      <p
+        class="tutorial-intro__ok"
+        id="tutorialIntroOk"
+        hidden
+        aria-live="polite"
+        data-i18n="tutorial.ok"
+      >
+        좋아요!
+      </p>
+    </div>
+  </div>
+  <div
+    class="tutorial-flight"
+    id="tutorialFlight"
+    hidden
+    role="region"
+    aria-label=""
+    data-i18n-attr="aria-label|tutorial.flightRegionAria"
+  >
+    <div class="tutorial-flight__panel" id="tutorialFlightPanel">
+      <div id="tutorialFlightBlockIntro">
+        <p
+          id="tutorialFlightL1"
+          class="tutorial-flight__line"
+          data-i18n="tutorial.flight1"
+        >
+          자, 이건 당신이예요!
+        </p>
+        <p
+          id="tutorialFlightL2"
+          class="tutorial-flight__line"
+          data-i18n="tutorial.flight2"
+        >
+          꿀벌이 되서,
+        </p>
+        <p
+          id="tutorialFlightL3"
+          class="tutorial-flight__line"
+          data-i18n="tutorial.flight3"
+        >
+          스페이스바로 높이 조정을 해요!
+        </p>
+      </div>
+      <div id="tutorialFlightBlockCongrats" hidden>
+        <p
+          id="tutorialFlightL4"
+          class="tutorial-flight__line"
+          data-i18n="tutorial.flightWellDone"
+        >
+          잘했어요!
+        </p>
+        <p
+          id="tutorialFlightL5"
+          class="tutorial-flight__line"
+          data-i18n-html="tutorial.flightObstacleLine"
+        ></p>
+      </div>
+      <div id="tutorialFlightBlockFinale" hidden>
+        <p class="tutorial-flight__finale-ok" data-i18n="tutorial.ok">
+          좋아요!
+        </p>
+        <button
+          type="button"
+          class="tutorial-flight__continue"
+          id="tutorialFlightContinue"
+          data-i18n="tutorial.flightContinue"
+        >
+          계속
+        </button>
+      </div>
+    </div>
+  </div>
+  <div
+    class="tutorial-space-hint"
+    id="tutorialSpaceHint"
+    hidden
+    aria-hidden="true"
+  >
+    <span class="tutorial-space-hint__kbd" data-i18n="tutorial.spaceKbd">Space</span>
+  </div>
+  <div
+    class="settings-modal"
+    id="settingsModal"
+    hidden
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="settingsModalTitle"
+  >
+    <div class="settings-modal__sheet">
+      <button
+        type="button"
+        class="settings-modal__close"
+        id="settingsModalClose"
+        data-i18n-attr="aria-label|settings.closeAria"
+        aria-label="닫기"
+      >
+        &times;
+      </button>
+      <h2 class="settings-modal__title" id="settingsModalTitle" data-i18n="settings.title">
+        설정
+      </h2>
+      <div class="settings-row">
+        <span class="settings-row__label" data-i18n="settings.language">언어</span>
+        <button
+          type="button"
+          class="settings-lang-btn"
+          id="settingsLangBtn"
+          aria-haspopup="listbox"
+          aria-expanded="false"
+        >
+          <span id="settingsLangCurrent">한국어</span>
+        </button>
+      </div>
+      <div class="settings-lang-picker" id="settingsLangPicker" hidden role="listbox">
+        <button
+          type="button"
+          class="settings-lang-option"
+          id="settingsLangKo"
+          data-set-lang="ko"
+          role="option"
+        >
+          한국어
+        </button>
+        <button
+          type="button"
+          class="settings-lang-option"
+          id="settingsLangEn"
+          data-set-lang="en"
+          role="option"
+        >
+          English
+        </button>
+      </div>
+    </div>
+  </div>
+  <div
+    class="bee-honey-flood"
+    id="beeHoneyFlood"
+    aria-hidden="true"
+    hidden
+  >
+    <div class="bee-honey-flood__wave bee-honey-flood__wave--1"></div>
+    <div class="bee-honey-flood__wave bee-honey-flood__wave--2"></div>
+    <div class="bee-honey-flood__wave bee-honey-flood__wave--3"></div>
+    <div class="bee-honey-flood__shrink" aria-hidden="true"></div>
+  </div>
+
+  <div
+    class="bbatkkot-scene"
+    id="bbatkkotScene"
+    aria-hidden="true"
+    hidden
+  >
+    <div class="bbatkkot-tree-wrap">
+      <svg viewBox="0 0 400 520" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+        <defs>
+          <linearGradient id="oak-trunk" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0%" stop-color="#4e342e"/>
+            <stop offset="55%" stop-color="#6d4c41"/>
+            <stop offset="100%" stop-color="#5d4037"/>
+          </linearGradient>
+          <linearGradient id="oak-crown-a" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#689f38"/>
+            <stop offset="100%" stop-color="#33691e"/>
+          </linearGradient>
+          <linearGradient id="oak-crown-b" x1="1" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#558b2f"/>
+            <stop offset="100%" stop-color="#1b5e20"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="205" cy="175" rx="138" ry="108" fill="url(#oak-crown-a)" opacity="0.96"/>
+        <ellipse cx="125" cy="205" rx="92" ry="72" fill="url(#oak-crown-b)" opacity="0.92"/>
+        <ellipse cx="285" cy="195" rx="98" ry="78" fill="#43a047" opacity="0.88"/>
+        <ellipse cx="200" cy="140" rx="85" ry="65" fill="#7cb342" opacity="0.9"/>
+        <path
+          d="M200 520 L166 312 Q200 288 234 312 L200 520 Z"
+          fill="url(#oak-trunk)"
+          stroke="#3e2723"
+          stroke-width="0.8"
+        />
+        <path
+          d="M188 318 C 140 285 95 248 88 222"
+          fill="none"
+          stroke="#5d4037"
+          stroke-width="11"
+          stroke-linecap="round"
+        />
+        <path
+          d="M95 228 L82 218"
+          fill="none"
+          stroke="#4e342e"
+          stroke-width="6"
+          stroke-linecap="round"
+        />
+        <g transform="translate(78,208) rotate(-10)">
+          <image
+            href="BEEE/BEEhouse.png"
+            x="-100"
+            y="-152"
+            width="200"
+            height="304"
+            preserveAspectRatio="xMidYMid meet"
+          />
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <div
+    class="hive-room"
+    id="hiveRoom"
+    data-i18n-attr="aria-label|hive.roomAria"
+    aria-label="벌집 안 방. 양옆에 책꽂이가 있고, 가운데 아기 꿀벌과 할머니 꿀벌이 있다."
+    aria-hidden="true"
+    hidden
+  >
+    <div class="hive-room__stage">
+    <div class="hive-room-view" id="hiveRoomView">
+    <div class="hive-room-zoom-wrap" id="hiveRoomZoomWrap">
+    <svg
+      class="hive-room-svg"
+      viewBox="0 0 900 700"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <defs>
+        <linearGradient id="hr-room-wall" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#4e342e"/>
+          <stop offset="100%" stop-color="#2d1a12"/>
+        </linearGradient>
+        <linearGradient id="hr-room-floor" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#5d4037"/>
+          <stop offset="100%" stop-color="#3e2723"/>
+        </linearGradient>
+        <radialGradient id="hr-warm-glow" cx="50%" cy="40%" r="65%">
+          <stop offset="0%" stop-color="rgba(255,213,79,0.35)"/>
+          <stop offset="100%" stop-color="rgba(45,26,18,0)"/>
+        </radialGradient>
+        <linearGradient id="hr-bookshelf-wood" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#3e2723"/>
+          <stop offset="45%" stop-color="#6d4c41"/>
+          <stop offset="100%" stop-color="#4e342e"/>
+        </linearGradient>
+      </defs>
+      <rect width="900" height="700" fill="url(#hr-room-wall)"/>
+      <ellipse cx="450" cy="320" rx="380" ry="240" fill="url(#hr-warm-glow)"/>
+      <path
+        d="M0 520 Q450 480 900 520 L900 700 L0 700 Z"
+        fill="url(#hr-room-floor)"
+      />
+      <g
+        id="hr-exit-door"
+        transform="translate(548, 252)"
+        aria-hidden="true"
+      >
+        <title id="hr-exit-door-title" data-i18n="door.svgTitle">출구 문</title>
+        <rect
+          x="-6"
+          y="-10"
+          width="92"
+          height="258"
+          rx="6"
+          fill="#2d1a12"
+          stroke="#1a1008"
+          stroke-width="2"
+        />
+        <rect
+          x="2"
+          y="2"
+          width="76"
+          height="234"
+          rx="4"
+          fill="#4e342e"
+          stroke="#6d4c41"
+          stroke-width="2"
+        />
+        <rect x="10" y="12" width="60" height="210" rx="2" fill="#5d4037"/>
+        <ellipse cx="68" cy="128" rx="7" ry="10" fill="#ffb300" stroke="#f57f17" stroke-width="1.5"/>
+        <path
+          d="M26 42 Q46 22 66 42"
+          fill="none"
+          stroke="#3e2723"
+          stroke-width="3"
+          stroke-linecap="round"
+          opacity="0.45"
+        />
+      </g>
+      <g opacity="0.12" fill="none" stroke="#ffc107" stroke-width="1.2">
+        <path d="M80 120 L120 90 L160 120 L120 150 Z"/>
+        <path d="M720 160 L760 130 L800 160 L760 190 Z"/>
+        <path d="M400 80 L440 50 L480 80 L440 110 Z"/>
+      </g>
+      <g id="hr-bookshelf-left" transform="translate(14, 128)" aria-hidden="true">
+        <rect
+          x="-2"
+          y="-2"
+          width="92"
+          height="388"
+          rx="6"
+          fill="#1a1008"
+          opacity="0.35"
+        />
+        <rect
+          x="0"
+          y="0"
+          width="88"
+          height="384"
+          rx="5"
+          fill="url(#hr-bookshelf-wood)"
+          stroke="#2d1a12"
+          stroke-width="2"
+        />
+        <rect x="6" y="6" width="76" height="372" rx="3" fill="#1b120c" opacity="0.5"/>
+        <rect x="8" y="74" width="72" height="5" fill="#5d4037"/>
+        <rect x="8" y="154" width="72" height="5" fill="#5d4037"/>
+        <rect x="8" y="234" width="72" height="5" fill="#5d4037"/>
+        <rect x="8" y="314" width="72" height="5" fill="#5d4037"/>
+        <rect x="8" y="378" width="72" height="6" fill="#4e342e"/>
+        <rect x="11" y="18" width="13" height="54" fill="#b71c1c"/>
+        <rect x="26" y="26" width="11" height="46" fill="#0d47a1"/>
+        <rect x="39" y="22" width="12" height="50" fill="#f9a825"/>
+        <rect x="53" y="30" width="10" height="42" fill="#2e7d32"/>
+        <rect x="65" y="24" width="14" height="48" fill="#6a1b9a"/>
+        <rect x="11" y="98" width="12" height="52" fill="#c62828"/>
+        <rect x="25" y="104" width="14" height="46" fill="#37474f"/>
+        <rect x="41" y="96" width="11" height="54" fill="#fbc02d"/>
+        <rect x="54" y="108" width="9" height="42" fill="#00838f"/>
+        <rect x="65" y="100" width="12" height="50" fill="#ad1457"/>
+        <rect x="12" y="178" width="15" height="52" fill="#283593"/>
+        <rect x="29" y="186" width="10" height="44" fill="#e65100"/>
+        <rect x="41" y="174" width="13" height="56" fill="#546e7a"/>
+        <rect x="56" y="182" width="12" height="48" fill="#c2185b"/>
+        <rect x="70" y="190" width="8" height="40" fill="#558b2f"/>
+        <rect x="10" y="258" width="11" height="52" fill="#7b1fa2"/>
+        <rect x="23" y="266" width="13" height="44" fill="#d84315"/>
+        <rect x="38" y="254" width="12" height="56" fill="#00695c"/>
+        <rect x="52" y="262" width="10" height="48" fill="#1565c0"/>
+        <rect x="64" y="270" width="12" height="40" fill="#8e24aa"/>
+        <rect x="13" y="338" width="14" height="38" fill="#c62828"/>
+        <rect x="29" y="344" width="11" height="32" fill="#37474f"/>
+        <rect x="42" y="332" width="13" height="44" fill="#f57f17"/>
+        <rect x="57" y="340" width="12" height="36" fill="#2e7d32"/>
+        <rect x="71" y="336" width="9" height="40" fill="#5e35b1"/>
+      </g>
+      <g id="hr-bookshelf-right" transform="translate(798, 128)">
+        <rect
+          x="-2"
+          y="-2"
+          width="92"
+          height="388"
+          rx="6"
+          fill="#1a1008"
+          opacity="0.35"
+        />
+        <rect
+          x="0"
+          y="0"
+          width="88"
+          height="384"
+          rx="5"
+          fill="url(#hr-bookshelf-wood)"
+          stroke="#2d1a12"
+          stroke-width="2"
+        />
+        <rect x="6" y="6" width="76" height="372" rx="3" fill="#1b120c" opacity="0.5"/>
+        <rect x="8" y="74" width="72" height="5" fill="#5d4037"/>
+        <rect x="8" y="154" width="72" height="5" fill="#5d4037"/>
+        <rect x="8" y="234" width="72" height="5" fill="#5d4037"/>
+        <rect x="8" y="314" width="72" height="5" fill="#5d4037"/>
+        <rect x="8" y="378" width="72" height="6" fill="#4e342e"/>
+        <rect x="64" y="18" width="13" height="54" fill="#8e24aa"/>
+        <rect x="51" y="26" width="11" height="46" fill="#1565c0"/>
+        <rect x="37" y="22" width="12" height="50" fill="#ad1457"/>
+        <rect x="25" y="30" width="10" height="42" fill="#43a047"/>
+        <rect x="9" y="24" width="14" height="48" fill="#d32f2f"/>
+        <rect x="65" y="98" width="12" height="52" fill="#00838f"/>
+        <rect x="49" y="104" width="14" height="46" fill="#6d4c41"/>
+        <rect x="33" y="96" width="11" height="54" fill="#fbc02d"/>
+        <rect x="21" y="108" width="9" height="42" fill="#c62828"/>
+        <rect x="11" y="100" width="12" height="50" fill="#3949ab"/>
+        <rect x="61" y="178" width="15" height="52" fill="#bf360c"/>
+        <rect x="49" y="186" width="10" height="44" fill="#00695c"/>
+        <rect x="34" y="174" width="13" height="56" fill="#78909c"/>
+        <rect x="20" y="182" width="12" height="48" fill="#7b1fa2"/>
+        <rect x="10" y="190" width="8" height="40" fill="#9e9d24"/>
+        <rect x="67" y="258" width="11" height="52" fill="#5e35b1"/>
+        <rect x="52" y="266" width="13" height="44" fill="#e64a19"/>
+        <rect x="38" y="254" width="12" height="56" fill="#00897b"/>
+        <rect x="26" y="262" width="10" height="48" fill="#303f9f"/>
+        <rect x="12" y="270" width="12" height="40" fill="#c2185b"/>
+        <rect x="65" y="338" width="14" height="38" fill="#37474f"/>
+        <rect x="48" y="344" width="11" height="32" fill="#ffb300"/>
+        <rect x="33" y="332" width="13" height="44" fill="#2e7d32"/>
+        <rect x="19" y="340" width="12" height="36" fill="#512da8"/>
+        <rect x="8" y="336" width="9" height="40" fill="#c62828"/>
+        <g
+          id="hr-secret-note"
+          class="hive-shelf-note"
+          transform="translate(42, 194)"
+          pointer-events="all"
+          role="button"
+          tabindex="0"
+          data-i18n-attr="aria-label|note.stickyAria"
+          aria-label="책꽂이에 낀 쪽지"
+        >
+          <title id="hr-secret-note-title" data-i18n="note.iconTitle">쪽지</title>
+          <rect
+            x="-15"
+            y="-17"
+            width="32"
+            height="40"
+            rx="2"
+            fill="#fffef5"
+            stroke="#a1887f"
+            stroke-width="1.2"
+            transform="rotate(-8)"
+          />
+          <path
+            d="M14 -17 L29 -4 L29 21 Z"
+            fill="#ffe8c8"
+            stroke="#a1887f"
+            stroke-width="0.8"
+            transform="rotate(-8)"
+          />
+          <line
+            x1="-10"
+            y1="-6"
+            x2="12"
+            y2="-6"
+            stroke="#cfd8dc"
+            stroke-width="1"
+            transform="rotate(-8)"
+          />
+          <line
+            x1="-10"
+            y1="2"
+            x2="8"
+            y2="2"
+            stroke="#cfd8dc"
+            stroke-width="0.9"
+            opacity="0.85"
+            transform="rotate(-8)"
+          />
+        </g>
+      </g>
+      <g id="hr-grandma-bee" transform="translate(268, 272)">
+        <image
+          href="BEEE/granmaBEE.png"
+          x="-142"
+          y="0"
+          width="284"
+          height="315"
+          preserveAspectRatio="xMidYMid meet"
+        />
+      </g>
+      <g id="hr-baby-bee" transform="translate(470, 518) rotate(-6)">
+        <image
+          href="BEEE/bedAGIBEE.png"
+          x="-200"
+          y="-100"
+          width="400"
+          height="200"
+          preserveAspectRatio="xMidYMid meet"
+        />
+      </g>
+    </svg>
+    </div>
+    <button
+      type="button"
+      class="hive-map-hud"
+      id="hiveMapHud"
+      hidden
+      aria-hidden="true"
+      data-i18n-attr="aria-label|map.hudAria"
+      aria-label="지도"
+    >
+      <svg
+        width="26"
+        height="26"
+        viewBox="0 0 48 48"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <path
+          fill="currentColor"
+          d="M8 10c0-1.1.9-2 2-2h7l3-2h8l3 2h7a2 2 0 0 1 2 2v24l-7-3-8-4-8 4-7 3V10Z"
+        />
+        <path
+          fill="rgba(255,255,255,0.45)"
+          d="M20 10h8v10l-4-2-4 2V10Z"
+        />
+        <path
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          d="M14 18h4M30 20h4M16 28h6M14 34h5"
+          opacity="0.5"
+        />
+      </svg>
+    </button>
+    <div class="hive-map-gain" id="hiveMapGain" hidden aria-live="polite">
+      <p
+        class="hive-map-gain__text"
+        id="hiveMapGainText"
+        data-i18n-html="map.gainHtml"
+      >
+        <span class="hive-story__emph hive-story__emph--shake">지도</span>를 얻었다
+      </p>
+    </div>
+    </div>
+    <div
+      class="hive-baby-dialog"
+      id="hiveBabyDialog"
+      hidden
+      aria-hidden="true"
+      aria-live="polite"
+    >
+      <div class="hive-baby-dialog__bubble">
+        <p
+          class="hive-baby-dialog__line hive-baby-dialog__line--1"
+          data-i18n="baby.line1"
+        >
+          그래!
+        </p>
+        <p
+          class="hive-baby-dialog__line hive-baby-dialog__line--2"
+          data-i18n="baby.line2"
+        >
+          ...나도 그 숲에 가보는거야!
+        </p>
+      </div>
+    </div>
+    <div
+      class="hive-story"
+      id="hiveStory"
+      hidden
+      aria-live="polite"
+    >
+      <div class="hive-story__inner" id="hiveStoryInner"></div>
+    </div>
+    </div>
+  </div>
+
+  <div
+    class="hive-note-modal"
+    id="hiveNoteModal"
+    hidden
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="hiveNoteModalTitle"
+  >
+    <div class="hive-note-modal__sheet">
+      <button
+        type="button"
+        class="hive-note-modal__close"
+        id="hiveNoteModalClose"
+        data-i18n-attr="aria-label|note.closeAria"
+        aria-label="쪽지 닫기"
+      >
+        &times;
+      </button>
+      <h2 id="hiveNoteModalTitle" class="hive-note-modal__title" data-i18n="note.modalTitle">
+        낡은 쪽지
+      </h2>
+      <p class="hive-note-modal__body" data-i18n-html="note.body"></p>
+    </div>
+  </div>
+
+  <script>
+    (function (global) {
+      var STORAGE_KEY = "beeGameLang";
+      var STR = {
+        ko: {
+          pageTitle: "하늘과 구름 배경",
+          "menu.start": "시작하기",
+          "menu.settings": "설정",
+          "menu.howToPlay": "어떻게 플레이하지?",
+          "menu.mainNavAria": "메인 메뉴",
+          "settings.title": "설정",
+          "settings.closeAria": "닫기",
+          "settings.language": "언어",
+          "lang.labelKo": "한국어",
+          "lang.labelEn": "English",
+          "tutorial.l1": "안녕하세요 플레이어분!",
+          "tutorial.l2": "튜토리얼을 시작할까요?",
+          "tutorial.yesAria": "예, 튜토리얼 시작",
+          "tutorial.noAria": "아니오",
+          "tutorial.ok": "좋아요!",
+          "tutorial.flightRegionAria": "플레이어 꿀벌 안내",
+          "tutorial.flight1": "자, 이건 당신이예요!",
+          "tutorial.flight2": "꿀벌이 되서,",
+          "tutorial.flight3": "스페이스바로 높이 조정을 해요!",
+          "tutorial.flightWellDone": "잘했어요!",
+          "tutorial.flightObstacleLine":
+            '이제 이 꿀벌은 앞 <span class="tutorial-flight__emph-shake">장애물</span>을 피해 가야돼요!',
+          "tutorial.flightContinue": "계속",
+          "tutorial.spaceKbd": "Space",
+          "hive.roomAria":
+            "벌집 안 방. 양옆에 책꽂이가 있고, 가운데 아기 꿀벌과 할머니 꿀벌이 있다.",
+          "door.svgTitle": "출구 문",
+          "door.exitAria": "문으로 나가기",
+          "note.stickyAria": "책꽂이에 낀 쪽지",
+          "note.iconTitle": "쪽지",
+          "note.closeAria": "쪽지 닫기",
+          "note.modalTitle": "낡은 쪽지",
+          "note.body":
+            '그래, 그 숲...<br /><span class="hive-note-emph">꽃의 숲</span><span class="hive-note-modal__en"> (THE BLOOM FOREST)</span>이야.<br />... 아무도 안 가봤어. 하지만 나도 가보려고 했다고.<br />거의 모두가 가는데 실패했어.<br />나에겐 <span class="hive-note-emph">지도</span>가 있어. ....가져가.<br />너... 누군진 모르지만 너라도 성공해서 가야돼.<br />그 숲엔 이상한 꽃들도 많아서 <span class="hive-note-emph">조심</span>하는게 좋을거야.',
+          "map.hudAria": "지도",
+          "map.gainHtml":
+            '<span class="hive-story__emph hive-story__emph--shake">지도</span>를 얻었다',
+          "baby.line1": "그래!",
+          "baby.line2": "...나도 그 숲에 가보는거야!",
+          grandmaLines: [
+            "옛날 옛날에..",
+            "한 전설의 숲이 있었단다.",
+            "그 숲은",
+            "꿀벌 중 그 누구도 거의 가본적이 없어.",
+            "그곳이 전설인 이유는",
+            "어떤 숲보다 더 많고 다양한 꽃이 있어.",
+            "맛을 본 꿀의 꽃이 있기도 하지만,",
+            "아무도 맛 보지 못한 꽃이 있을 수도 있단다.",
+            "....",
+          ],
+        },
+        en: {
+          pageTitle: "Sky & Clouds",
+          "menu.start": "Start!",
+          "menu.settings": "Option",
+          "menu.howToPlay": "how to play?",
+          "menu.mainNavAria": "Main menu",
+          "settings.title": "Option",
+          "settings.closeAria": "Close",
+          "settings.language": "Language",
+          "lang.labelKo": "한국어",
+          "lang.labelEn": "English",
+          "tutorial.l1": "Hello, player!",
+          "tutorial.l2": "Shall we start the tutorial?",
+          "tutorial.yesAria": "Yes, start the tutorial",
+          "tutorial.noAria": "No",
+          "tutorial.ok": "Great!",
+          "tutorial.flightRegionAria": "Player bee tutorial",
+          "tutorial.flight1": "Look—that's you!",
+          "tutorial.flight2": "You're a bee now—",
+          "tutorial.flight3": "Use the spacebar to move up and down!",
+          "tutorial.flightWellDone": "Nice work!",
+          "tutorial.flightObstacleLine":
+            'Now this bee has to dodge the <span class="tutorial-flight__emph-shake">obstacles</span> ahead!',
+          "tutorial.flightContinue": "Continue",
+          "tutorial.spaceKbd": "Space",
+          "hive.roomAria":
+            "Inside the hive: bookshelves on both sides; a baby bee and a grandmother bee.",
+          "door.svgTitle": "Exit door",
+          "door.exitAria": "Leave through the door",
+          "note.stickyAria": "Note stuck between books",
+          "note.iconTitle": "Note",
+          "note.closeAria": "Close note",
+          "note.modalTitle": "Old note",
+          "note.body":
+            'Yeah, that forest...<br /><span class="hive-note-emph">The Flower Forest</span><span class="hive-note-modal__en"> (THE BLOOM FOREST)</span>.<br />...Nobody\'s been there—but I tried too.<br />Almost everyone tries, and fails.<br />I have a <span class="hive-note-emph">map</span>. ....Take it.<br />I don\'t know who you are, but you should go and succeed.<br />That forest has strange flowers—<span class="hive-note-emph">be careful</span>.',
+          "map.hudAria": "Map",
+          "map.gainHtml":
+            'You got the <span class="hive-story__emph hive-story__emph--shake">map</span>',
+          "baby.line1": "Yeah!",
+          "baby.line2": "...I'm going to that forest too!",
+          grandmaLines: [
+            "Once upon a time...",
+            "There was a legendary forest.",
+            "That forest—",
+            "Almost no bee has ever been there.",
+            "What makes it legendary—",
+            "More kinds of flowers grow there than in any other forest.",
+            "Some flowers make honey you've tasted before,",
+            "But some might be flowers no one has tasted.",
+            "....",
+          ],
+        },
+      };
+
+      function getLang() {
+        var s = localStorage.getItem(STORAGE_KEY);
+        return s === "en" ? "en" : "ko";
+      }
+
+      function setLang(lang) {
+        if (lang !== "ko" && lang !== "en") return;
+        localStorage.setItem(STORAGE_KEY, lang);
+        document.documentElement.lang = lang === "en" ? "en" : "ko";
+        apply(lang);
+        try {
+          global.dispatchEvent(
+            new CustomEvent("game-lang-change", { detail: lang })
+          );
+        } catch (e) {}
+      }
+
+      function t(key) {
+        var lang = getLang();
+        var pack = STR[lang] || STR.ko;
+        if (pack[key] !== undefined) return pack[key];
+        return STR.ko[key] !== undefined ? STR.ko[key] : key;
+      }
+
+      function getGrandmaLines() {
+        var lang = getLang();
+        var pack = STR[lang] || STR.ko;
+        return pack.grandmaLines || STR.ko.grandmaLines;
+      }
+
+      function apply(lang) {
+        var dict = STR[lang] || STR.ko;
+        document.title = dict.pageTitle || STR.ko.pageTitle;
+
+        document.querySelectorAll("[data-i18n]").forEach(function (el) {
+          var key = el.getAttribute("data-i18n");
+          if (!key || dict[key] === undefined) return;
+          el.textContent = dict[key];
+        });
+
+        document.querySelectorAll("[data-i18n-html]").forEach(function (el) {
+          var key = el.getAttribute("data-i18n-html");
+          if (!key || dict[key] === undefined) return;
+          el.innerHTML = dict[key];
+        });
+
+        document.querySelectorAll("[data-i18n-attr]").forEach(function (el) {
+          var speclist = el.getAttribute("data-i18n-attr");
+          if (!speclist) return;
+          var parts = speclist.split("|");
+          for (var i = 0; i + 1 < parts.length; i += 2) {
+            var attr = parts[i];
+            var key = parts[i + 1];
+            if (dict[key] !== undefined) el.setAttribute(attr, dict[key]);
+          }
+        });
+
+        var cur = document.getElementById("settingsLangCurrent");
+        if (cur) {
+          cur.textContent =
+            lang === "en" ? dict["lang.labelEn"] : dict["lang.labelKo"];
+        }
+
+        var koOpt = document.getElementById("settingsLangKo");
+        var enOpt = document.getElementById("settingsLangEn");
+        if (koOpt) koOpt.classList.toggle("is-current", lang === "ko");
+        if (enOpt) enOpt.classList.toggle("is-current", lang === "en");
+      }
+
+      global.GameI18n = {
+        STR: STR,
+        getLang: getLang,
+        setLang: setLang,
+        t: t,
+        apply: apply,
+        getGrandmaLines: getGrandmaLines,
+      };
+
+      apply(getLang());
+    })(typeof window !== "undefined" ? window : this);
+  </script>
+  <script>
+    (function () {
+      var hiveBabyZoomSeqDone = false;
+      var hiveMapPhaseTimer;
+      var hiveResetTimer;
+      var tutorialIntroShowTimer;
+
+      var tutorialFlightRaf = null;
+      var tutorialFlightTimers = [];
+      var tutorialFlightHandlers = null;
+      var tutorialFlightDy = 0;
+      var tutorialFlightVel = 0;
+      var tutorialFlightFalling = false;
+      var tutorialFlightSpaceHeld = false;
+      var tutorialFlightStory = "idle";
+      var tutorialFlightBeeX = 0;
+
+      var COURSE_VX = 2.55;
+      var COURSE_END_X = 368;
+
+      function clearTutorialFlightTimers() {
+        tutorialFlightTimers.forEach(function (tid) {
+          window.clearTimeout(tid);
+        });
+        tutorialFlightTimers = [];
+      }
+
+      function rectsOverlap(a, b) {
+        return !(
+          a.right < b.left ||
+          a.left > b.right ||
+          a.bottom < b.top ||
+          a.top > b.bottom
+        );
+      }
+
+      function beeInflatedRect(el, inset) {
+        var r = el.getBoundingClientRect();
+        var i = inset || 6;
+        return {
+          left: r.left + i,
+          right: r.right - i,
+          top: r.top + i,
+          bottom: r.bottom - i,
+          width: r.width - i * 2,
+          height: r.height - i * 2,
+        };
+      }
+
+      function teardownTutorialFlight() {
+        clearTutorialFlightTimers();
+        if (tutorialFlightRaf != null) {
+          window.cancelAnimationFrame(tutorialFlightRaf);
+          tutorialFlightRaf = null;
+        }
+        if (tutorialFlightHandlers) {
+          document.removeEventListener(
+            "keydown",
+            tutorialFlightHandlers.down,
+            true
+          );
+          document.removeEventListener("keyup", tutorialFlightHandlers.up, true);
+          tutorialFlightHandlers = null;
+        }
+        tutorialFlightStory = "idle";
+        document.body.classList.remove(
+          "tutorial-welcome--flight",
+          "tutorial-welcome--flight-finale",
+          "tutorial-course-hit"
+        );
+        var solo = document.getElementById("playerBeeSolo");
+        if (solo) {
+          solo.style.removeProperty("--bee-dy");
+          solo.style.removeProperty("--bee-x");
+        }
+        var flightEl = document.getElementById("tutorialFlight");
+        var hintEl = document.getElementById("tutorialSpaceHint");
+        var panel = document.getElementById("tutorialFlightPanel");
+        var blockIntro = document.getElementById("tutorialFlightBlockIntro");
+        var blockCongrats = document.getElementById("tutorialFlightBlockCongrats");
+        var blockFinale = document.getElementById("tutorialFlightBlockFinale");
+        if (panel) panel.classList.remove("tutorial-flight__panel--fade-out");
+        ["tutorialFlightL1", "tutorialFlightL2", "tutorialFlightL3"].forEach(
+          function (id) {
+            var el = document.getElementById(id);
+            if (el) el.classList.remove("is-visible");
+          }
+        );
+        ["tutorialFlightL4", "tutorialFlightL5"].forEach(function (id) {
+          var el = document.getElementById(id);
+          if (el) el.classList.remove("is-visible");
+        });
+        if (blockIntro) blockIntro.removeAttribute("hidden");
+        if (blockCongrats) blockCongrats.setAttribute("hidden", "");
+        if (blockFinale) blockFinale.setAttribute("hidden", "");
+        if (flightEl) {
+          flightEl.setAttribute("hidden", "");
+          flightEl.setAttribute("aria-hidden", "true");
+        }
+        if (hintEl) {
+          hintEl.setAttribute("hidden", "");
+          hintEl.setAttribute("aria-hidden", "true");
+        }
+        var course = document.getElementById("tutorialCourse");
+        if (course) {
+          course.setAttribute("hidden", "");
+          course.setAttribute("aria-hidden", "true");
+        }
+        tutorialFlightDy = 0;
+        tutorialFlightVel = 0;
+        tutorialFlightFalling = false;
+        tutorialFlightSpaceHeld = false;
+        tutorialFlightBeeX = 0;
+      }
+
+      function maxTutorialFlightAltitudePx() {
+        return -Math.min(268, window.innerHeight * 0.27);
+      }
+
+      function fadeCongratsPanelStartCourse() {
+        if (tutorialFlightStory !== "congrats") return;
+        var panel = document.getElementById("tutorialFlightPanel");
+        var flightEl = document.getElementById("tutorialFlight");
+        if (panel) panel.classList.add("tutorial-flight__panel--fade-out");
+        tutorialFlightTimers.push(
+          window.setTimeout(function () {
+            if (tutorialFlightStory !== "congrats") return;
+            if (flightEl) flightEl.setAttribute("hidden", "");
+            if (flightEl) flightEl.setAttribute("aria-hidden", "true");
+            if (panel) panel.classList.remove("tutorial-flight__panel--fade-out");
+            startObstacleCourse();
+          }, 680)
+        );
+      }
+
+      function endTutorialFlightFinale() {
+        tutorialFlightStory = "finale";
+        if (tutorialFlightRaf != null) {
+          window.cancelAnimationFrame(tutorialFlightRaf);
+          tutorialFlightRaf = null;
+        }
+        tutorialFlightSpaceHeld = false;
+        var soloBee = document.getElementById("playerBeeSolo");
+        var course = document.getElementById("tutorialCourse");
+        if (course) {
+          course.setAttribute("hidden", "");
+          course.setAttribute("aria-hidden", "true");
+        }
+        document.body.classList.add("tutorial-welcome--flight-finale");
+        if (soloBee) {
+          soloBee.style.removeProperty("--bee-x");
+          soloBee.style.setProperty("--bee-dy", "0px");
+        }
+        tutorialFlightBeeX = 0;
+        var flightEl = document.getElementById("tutorialFlight");
+        var blockIntro = document.getElementById("tutorialFlightBlockIntro");
+        var blockCongrats = document.getElementById("tutorialFlightBlockCongrats");
+        var blockFinale = document.getElementById("tutorialFlightBlockFinale");
+        if (blockIntro) blockIntro.setAttribute("hidden", "");
+        if (blockCongrats) blockCongrats.setAttribute("hidden", "");
+        if (blockFinale) blockFinale.removeAttribute("hidden");
+        if (flightEl) {
+          flightEl.removeAttribute("hidden");
+          flightEl.setAttribute("aria-hidden", "false");
+        }
+      }
+
+      function startObstacleCourse() {
+        if (!document.body.classList.contains("tutorial-welcome--flight")) return;
+        tutorialFlightStory = "course";
+        tutorialFlightDy = 0;
+        tutorialFlightVel = 0;
+        tutorialFlightFalling = false;
+        tutorialFlightBeeX = 0;
+        tutorialFlightSpaceHeld = false;
+        var soloBee = document.getElementById("playerBeeSolo");
+        var course = document.getElementById("tutorialCourse");
+        var obsTop = document.getElementById("tutorialObsTop");
+        var obsBottom = document.getElementById("tutorialObsBottom");
+        if (soloBee) {
+          soloBee.style.setProperty("--bee-dy", "0px");
+          soloBee.style.setProperty("--bee-x", "0px");
+        }
+        if (course) {
+          course.removeAttribute("hidden");
+          course.setAttribute("aria-hidden", "false");
+        }
+
+        function tick() {
+          if (tutorialFlightStory !== "course") {
+            tutorialFlightRaf = null;
+            return;
+          }
+
+          var rise = 3.9;
+          var gravity = 2.85;
+          var maxDown = 34;
+          var ceiling = maxTutorialFlightAltitudePx();
+
+          if (tutorialFlightFalling) {
+            tutorialFlightVel = Math.min(maxDown, tutorialFlightVel + gravity);
+            tutorialFlightDy += tutorialFlightVel;
+            if (tutorialFlightDy >= 0) {
+              tutorialFlightDy = 0;
+              tutorialFlightFalling = false;
+              tutorialFlightVel = 0;
+            }
+          } else if (tutorialFlightSpaceHeld) {
+            tutorialFlightDy -= rise;
+            if (tutorialFlightDy <= ceiling) {
+              tutorialFlightDy = ceiling;
+              tutorialFlightFalling = true;
+              tutorialFlightVel = 4;
+            }
+          }
+
+          tutorialFlightBeeX += COURSE_VX;
+          if (soloBee) {
+            soloBee.style.setProperty("--bee-dy", tutorialFlightDy + "px");
+            soloBee.style.setProperty("--bee-x", tutorialFlightBeeX + "px");
+          }
+
+          if (tutorialFlightBeeX >= COURSE_END_X) {
+            endTutorialFlightFinale();
+            return;
+          }
+
+          if (soloBee && obsTop && obsBottom) {
+            var beeR = beeInflatedRect(soloBee, 8);
+            var topR = obsTop.getBoundingClientRect();
+            var botR = obsBottom.getBoundingClientRect();
+            if (rectsOverlap(beeR, topR) || rectsOverlap(beeR, botR)) {
+              document.body.classList.add("tutorial-course-hit");
+              window.setTimeout(function () {
+                document.body.classList.remove("tutorial-course-hit");
+              }, 220);
+              tutorialFlightBeeX = 0;
+              tutorialFlightDy = 0;
+              tutorialFlightVel = 0;
+              tutorialFlightFalling = false;
+              if (soloBee) {
+                soloBee.style.setProperty("--bee-dy", "0px");
+                soloBee.style.setProperty("--bee-x", "0px");
+              }
+            }
+          }
+
+          tutorialFlightRaf = window.requestAnimationFrame(tick);
+        }
+
+        tutorialFlightRaf = window.requestAnimationFrame(tick);
+      }
+
+      function goToCongratsFromIntro() {
+        if (tutorialFlightStory !== "intro") return;
+        tutorialFlightStory = "congrats";
+        clearTutorialFlightTimers();
+        var hintEl = document.getElementById("tutorialSpaceHint");
+        if (hintEl) {
+          hintEl.setAttribute("hidden", "");
+          hintEl.setAttribute("aria-hidden", "true");
+        }
+        var blockIntro = document.getElementById("tutorialFlightBlockIntro");
+        var blockCongrats = document.getElementById("tutorialFlightBlockCongrats");
+        if (blockIntro) blockIntro.setAttribute("hidden", "");
+        if (blockCongrats) {
+          blockCongrats.removeAttribute("hidden");
+          try {
+            GameI18n.apply(GameI18n.getLang());
+          } catch (e) {}
+          var l4 = document.getElementById("tutorialFlightL4");
+          var l5 = document.getElementById("tutorialFlightL5");
+          if (l4) {
+            l4.classList.remove("is-visible");
+            void l4.offsetWidth;
+            l4.classList.add("is-visible");
+          }
+          if (l5) {
+            l5.classList.remove("is-visible");
+            void l5.offsetWidth;
+            window.setTimeout(function () {
+              if (l5) l5.classList.add("is-visible");
+            }, 400);
+          }
+        }
+        tutorialFlightTimers.push(
+          window.setTimeout(function () {
+            fadeCongratsPanelStartCourse();
+          }, 3000)
+        );
+      }
+
+      function startTutorialFlightPhase() {
+        if (!document.body.classList.contains("tutorial-welcome")) return;
+
+        var intro = document.getElementById("tutorialIntro");
+        var soloBee = document.getElementById("playerBeeSolo");
+        var flightEl = document.getElementById("tutorialFlight");
+        var hintEl = document.getElementById("tutorialSpaceHint");
+        var l1 = document.getElementById("tutorialFlightL1");
+        var l2 = document.getElementById("tutorialFlightL2");
+        var l3 = document.getElementById("tutorialFlightL3");
+        var panel = document.getElementById("tutorialFlightPanel");
+        var blockIntro = document.getElementById("tutorialFlightBlockIntro");
+        var blockCongrats = document.getElementById("tutorialFlightBlockCongrats");
+        var blockFinale = document.getElementById("tutorialFlightBlockFinale");
+
+        teardownTutorialFlight();
+
+        if (intro) {
+          intro.classList.remove("tutorial-intro--fade-out");
+          intro.setAttribute("hidden", "");
+          intro.setAttribute("aria-hidden", "true");
+        }
+
+        document.body.classList.add("tutorial-welcome--flight");
+        tutorialFlightStory = "intro";
+
+        tutorialFlightDy = 0;
+        tutorialFlightVel = 0;
+        tutorialFlightFalling = false;
+        tutorialFlightSpaceHeld = false;
+        tutorialFlightBeeX = 0;
+
+        if (soloBee) {
+          soloBee.style.setProperty("--bee-dy", "0px");
+          soloBee.style.removeProperty("--bee-x");
+        }
+        if (panel) panel.classList.remove("tutorial-flight__panel--fade-out");
+        if (blockIntro) blockIntro.removeAttribute("hidden");
+        if (blockCongrats) blockCongrats.setAttribute("hidden", "");
+        if (blockFinale) blockFinale.setAttribute("hidden", "");
+
+        if (flightEl) {
+          flightEl.removeAttribute("hidden");
+          flightEl.setAttribute("aria-hidden", "false");
+        }
+        if (l1) l1.classList.remove("is-visible");
+        if (l2) l2.classList.remove("is-visible");
+        if (l3) l3.classList.remove("is-visible");
+        if (hintEl) {
+          hintEl.setAttribute("hidden", "");
+          hintEl.setAttribute("aria-hidden", "true");
+        }
+
+        tutorialFlightTimers.push(
+          window.setTimeout(function () {
+            if (l1) l1.classList.add("is-visible");
+          }, 100),
+          window.setTimeout(function () {
+            if (l2) l2.classList.add("is-visible");
+          }, 920),
+          window.setTimeout(function () {
+            if (l3) l3.classList.add("is-visible");
+          }, 1780),
+          window.setTimeout(function () {
+            if (
+              hintEl &&
+              document.body.classList.contains("tutorial-welcome--flight") &&
+              tutorialFlightStory === "intro"
+            ) {
+              hintEl.removeAttribute("hidden");
+              hintEl.setAttribute("aria-hidden", "false");
+            }
+          }, 2680)
+        );
+
+        function onKeyDown(e) {
+          if (!document.body.classList.contains("tutorial-welcome--flight"))
+            return;
+          if (e.code !== "Space" && e.key !== " ") return;
+          e.preventDefault();
+          if (tutorialFlightStory === "intro") {
+            if (e.repeat) return;
+            goToCongratsFromIntro();
+            return;
+          }
+          if (tutorialFlightStory !== "course") return;
+          if (e.repeat) return;
+          tutorialFlightSpaceHeld = true;
+          if (hintEl && !hintEl.hasAttribute("hidden")) {
+            hintEl.setAttribute("hidden", "");
+            hintEl.setAttribute("aria-hidden", "true");
+          }
+        }
+
+        function onKeyUp(e) {
+          if (!document.body.classList.contains("tutorial-welcome--flight"))
+            return;
+          if (e.code !== "Space" && e.key !== " ") return;
+          e.preventDefault();
+          if (tutorialFlightStory !== "course") return;
+          tutorialFlightSpaceHeld = false;
+        }
+
+        tutorialFlightHandlers = { down: onKeyDown, up: onKeyUp };
+        document.addEventListener("keydown", onKeyDown, true);
+        document.addEventListener("keyup", onKeyUp, true);
+      }
+
+      function exitHiveRoom() {
+        document.body.classList.remove(
+          "hive-room-active",
+          "hive-room-has-door",
+          "sky-only",
+          "sky-only-ui",
+          "bbatkkot-hive-inside"
+        );
+        var hiveRoom = document.getElementById("hiveRoom");
+        if (hiveRoom) {
+          hiveRoom.setAttribute("hidden", "");
+          hiveRoom.setAttribute("aria-hidden", "true");
+        }
+        var wrap = document.getElementById("hiveRoomZoomWrap");
+        var view = document.getElementById("hiveRoomView");
+        if (wrap) wrap.classList.remove("hive-room-zoom-wrap--baby");
+        if (view) view.classList.remove("hive-room-view--map-zoom");
+        var door = document.getElementById("hr-exit-door");
+        if (door) {
+          door.setAttribute("aria-hidden", "true");
+          door.removeAttribute("tabindex");
+          door.removeAttribute("role");
+        }
+        document.documentElement.style.overflow = "";
+        document.body.style.overflow = "";
+        var scene = document.getElementById("bbatkkotScene");
+        if (scene) {
+          scene.setAttribute("hidden", "");
+          scene.setAttribute("aria-hidden", "true");
+        }
+
+        document.body.classList.add("tutorial-welcome");
+        var soloBee = document.getElementById("playerBeeSolo");
+        var tutIntro = document.getElementById("tutorialIntro");
+        window.clearTimeout(tutorialIntroShowTimer);
+        if (soloBee) {
+          soloBee.removeAttribute("hidden");
+          soloBee.setAttribute("aria-hidden", "false");
+        }
+        if (tutIntro) {
+          tutIntro.setAttribute("hidden", "");
+          tutIntro.setAttribute("aria-hidden", "true");
+          tutorialIntroShowTimer = window.setTimeout(function () {
+            tutIntro.removeAttribute("hidden");
+            tutIntro.setAttribute("aria-hidden", "false");
+          }, 600);
+        }
+      }
+
+      function initTutorialIntro() {
+        var yesBtn = document.getElementById("tutorialIntroYes");
+        var noBtn = document.getElementById("tutorialIntroNo");
+        var intro = document.getElementById("tutorialIntro");
+        var okLine = document.getElementById("tutorialIntroOk");
+        var actions = document.getElementById("tutorialIntroActions");
+        var soloBee = document.getElementById("playerBeeSolo");
+        if (!yesBtn || !intro) return;
+
+        var flightContinue = document.getElementById("tutorialFlightContinue");
+
+        function finishTutorialWelcome() {
+          window.clearTimeout(tutorialIntroShowTimer);
+          teardownTutorialFlight();
+          document.body.classList.remove("tutorial-welcome");
+          intro.classList.remove("tutorial-intro--fade-out");
+          intro.setAttribute("hidden", "");
+          intro.setAttribute("aria-hidden", "true");
+          if (soloBee) {
+            soloBee.setAttribute("hidden", "");
+            soloBee.setAttribute("aria-hidden", "true");
+          }
+          if (okLine) okLine.setAttribute("hidden", "");
+          if (actions) actions.style.display = "";
+          var beesEl = document.querySelector(".bees");
+          if (beesEl) {
+            beesEl.classList.remove("bees--offscreen", "bees--start-dash");
+          }
+        }
+
+        yesBtn.addEventListener("click", function () {
+          if (!document.body.classList.contains("tutorial-welcome")) return;
+          if (actions) actions.style.display = "none";
+          if (okLine) okLine.removeAttribute("hidden");
+          window.setTimeout(function () {
+            intro.classList.add("tutorial-intro--fade-out");
+            window.setTimeout(startTutorialFlightPhase, 680);
+          }, 780);
+        });
+
+        if (noBtn) {
+          noBtn.addEventListener("click", function () {
+            if (!document.body.classList.contains("tutorial-welcome")) return;
+            intro.classList.add("tutorial-intro--fade-out");
+            window.setTimeout(finishTutorialWelcome, 580);
+          });
+        }
+
+        if (flightContinue) {
+          flightContinue.addEventListener("click", function () {
+            if (tutorialFlightStory !== "finale") return;
+            if (!document.body.classList.contains("tutorial-welcome--flight"))
+              return;
+            finishTutorialWelcome();
+          });
+        }
+      }
+
+      initTutorialIntro();
+
+      function initHiveExitDoor() {
+        var door = document.getElementById("hr-exit-door");
+        if (!door) return;
+        door.addEventListener("click", function (e) {
+          if (!document.body.classList.contains("hive-room-has-door")) return;
+          e.preventDefault();
+          exitHiveRoom();
+        });
+        door.addEventListener("keydown", function (e) {
+          if (!document.body.classList.contains("hive-room-has-door")) return;
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            exitHiveRoom();
+          }
+        });
+      }
+
+      initHiveExitDoor();
+
+      function startBabyZoomSequence() {
+        if (hiveBabyZoomSeqDone) return;
+        var wrap = document.getElementById("hiveRoomZoomWrap");
+        var view = document.getElementById("hiveRoomView");
+        if (!wrap || !view) return;
+        hiveBabyZoomSeqDone = true;
+
+        var dialog = document.getElementById("hiveBabyDialog");
+        var mapHud = document.getElementById("hiveMapHud");
+        var mapGain = document.getElementById("hiveMapGain");
+
+        document.documentElement.style.overflow = "visible";
+        document.body.style.overflow = "visible";
+
+        window.clearTimeout(hiveMapPhaseTimer);
+        window.clearTimeout(hiveResetTimer);
+
+        window.requestAnimationFrame(function () {
+          wrap.classList.add("hive-room-zoom-wrap--baby");
+          void wrap.offsetWidth;
+        });
+
+        if (dialog) {
+          dialog.removeAttribute("hidden");
+          dialog.setAttribute("aria-hidden", "false");
+          dialog.classList.remove("hive-baby-dialog--visible");
+          void dialog.offsetWidth;
+          dialog.classList.add("hive-baby-dialog--visible");
+        }
+
+        hiveMapPhaseTimer = window.setTimeout(function () {
+          wrap.classList.remove("hive-room-zoom-wrap--baby");
+          if (dialog) {
+            dialog.setAttribute("hidden", "");
+            dialog.setAttribute("aria-hidden", "true");
+            dialog.classList.remove("hive-baby-dialog--visible");
+          }
+          if (mapHud) {
+            mapHud.removeAttribute("hidden");
+            mapHud.setAttribute("aria-hidden", "false");
+          }
+          view.classList.add("hive-room-view--map-zoom");
+          if (mapGain) {
+            mapGain.removeAttribute("hidden");
+          }
+
+          hiveResetTimer = window.setTimeout(function () {
+            view.classList.remove("hive-room-view--map-zoom");
+            if (mapGain) {
+              mapGain.setAttribute("hidden", "");
+            }
+            document.body.classList.add("hive-room-has-door");
+            var door = document.getElementById("hr-exit-door");
+            if (door) {
+              door.setAttribute("aria-hidden", "false");
+              door.setAttribute("role", "button");
+              door.setAttribute("tabindex", "0");
+              door.setAttribute("aria-label", GameI18n.t("door.exitAria"));
+            }
+          }, 1000);
+        }, 1300);
+      }
+
+      function initHiveNoteModal() {
+        var note = document.getElementById("hr-secret-note");
+        var modal = document.getElementById("hiveNoteModal");
+        var closeBtn = document.getElementById("hiveNoteModalClose");
+        if (!note || !modal || !closeBtn) return;
+
+        function openModal() {
+          modal.removeAttribute("hidden");
+          document.body.style.overflow = "hidden";
+          closeBtn.focus();
+        }
+
+        function closeModal() {
+          modal.setAttribute("hidden", "");
+          document.body.style.overflow = "";
+          if (note && typeof note.focus === "function") {
+            try {
+              note.focus();
+            } catch (err) {}
+          }
+          var hiveRoomEl = document.getElementById("hiveRoom");
+          if (
+            document.body.classList.contains("hive-room-active") ||
+            (hiveRoomEl && !hiveRoomEl.hasAttribute("hidden"))
+          ) {
+            startBabyZoomSequence();
+          }
+        }
+
+        note.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          openModal();
+        });
+
+        note.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openModal();
+          }
+        });
+
+        closeBtn.addEventListener("click", function () {
+          closeModal();
+        });
+
+        modal.addEventListener("click", function (e) {
+          if (e.target === modal) {
+            closeModal();
+          }
+        });
+
+        document.addEventListener("keydown", function (e) {
+          if (
+            e.key === "Escape" &&
+            modal &&
+            !modal.hasAttribute("hidden")
+          ) {
+            closeModal();
+          }
+        });
+      }
+
+      initHiveNoteModal();
+
+      var bees = document.querySelector(".bees");
+      var btn = document.getElementById("btn-start");
+      var flood = document.getElementById("beeHoneyFlood");
+      var mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+      if (!bees || !btn) return;
+
+      var hiveStoryTimer;
+      var hiveStoryClearTimer;
+      var hiveStoryLineIndex = 0;
+
+      function fillHiveStoryParagraph(paragraphEl, line) {
+        var lang = GameI18n.getLang();
+        var nu = "그 누구도";
+        var am = "아무도";
+        if (lang === "ko") {
+          var i = line.indexOf(nu);
+          if (i !== -1) {
+            if (i > 0) {
+              paragraphEl.appendChild(document.createTextNode(line.slice(0, i)));
+            }
+            var sp = document.createElement("span");
+            sp.className = "hive-story__emph hive-story__emph--shake";
+            sp.textContent = nu;
+            paragraphEl.appendChild(sp);
+            paragraphEl.appendChild(
+              document.createTextNode(line.slice(i + nu.length))
+            );
+            return;
+          }
+          if (line.indexOf(am) === 0) {
+            var sp2 = document.createElement("span");
+            sp2.className = "hive-story__emph hive-story__emph--shake";
+            sp2.textContent = am;
+            paragraphEl.appendChild(sp2);
+            paragraphEl.appendChild(document.createTextNode(line.slice(am.length)));
+            return;
+          }
+          paragraphEl.appendChild(document.createTextNode(line));
+          return;
+        }
+        function tryEnEmph(phrase) {
+          var idx = line.indexOf(phrase);
+          if (idx === -1) return false;
+          if (idx > 0) {
+            paragraphEl.appendChild(document.createTextNode(line.slice(0, idx)));
+          }
+          var spn = document.createElement("span");
+          spn.className = "hive-story__emph hive-story__emph--shake";
+          spn.textContent = phrase;
+          paragraphEl.appendChild(spn);
+          paragraphEl.appendChild(
+            document.createTextNode(line.slice(idx + phrase.length))
+          );
+          return true;
+        }
+        if (tryEnEmph("no bee")) return;
+        if (tryEnEmph("no one")) return;
+        paragraphEl.appendChild(document.createTextNode(line));
+      }
+
+      function clearHiveStory() {
+        var box = document.getElementById("hiveStory");
+        var inner = document.getElementById("hiveStoryInner");
+        if (inner) inner.textContent = "";
+        if (box) box.setAttribute("hidden", "");
+      }
+
+      function startHiveGrandmaStory() {
+        var box = document.getElementById("hiveStory");
+        var inner = document.getElementById("hiveStoryInner");
+        if (!box || !inner) return;
+        window.clearTimeout(hiveStoryTimer);
+        window.clearTimeout(hiveStoryClearTimer);
+        inner.textContent = "";
+        hiveStoryLineIndex = 0;
+        box.removeAttribute("hidden");
+
+        var grandmaLines = GameI18n.getGrandmaLines();
+
+        function appendLine() {
+          if (hiveStoryLineIndex >= grandmaLines.length) {
+            return;
+          }
+          var p = document.createElement("p");
+          p.className = "hive-story__p";
+          fillHiveStoryParagraph(p, grandmaLines[hiveStoryLineIndex]);
+          inner.appendChild(p);
+          hiveStoryLineIndex += 1;
+          if (hiveStoryLineIndex < grandmaLines.length) {
+            var step = mq.matches ? 0 : 2200;
+            hiveStoryTimer = window.setTimeout(appendLine, step);
+          } else {
+            hiveStoryClearTimer = window.setTimeout(clearHiveStory, 600);
+          }
+        }
+
+        if (mq.matches) {
+          for (var j = 0; j < grandmaLines.length; j++) {
+            var pr = document.createElement("p");
+            pr.className = "hive-story__p";
+            fillHiveStoryParagraph(pr, grandmaLines[j]);
+            inner.appendChild(pr);
+          }
+          hiveStoryClearTimer = window.setTimeout(clearHiveStory, 600);
+          return;
+        }
+        appendLine();
+      }
+
+      function enterSkyOnly() {
+        document.body.classList.remove("sky-only-ui");
+        document.body.classList.add("sky-only");
+        var scene = document.getElementById("bbatkkotScene");
+        if (scene) {
+          scene.removeAttribute("hidden");
+          scene.setAttribute("aria-hidden", "false");
+        }
+        var treeWrap = document.querySelector(".bbatkkot-tree-wrap");
+        window.setTimeout(function () {
+          if (treeWrap) treeWrap.classList.add("bbatkkot-tree-wrap--zoom-hive");
+          document.body.classList.add("bbatkkot-hive-inside");
+
+          function showHiveRoom() {
+            document.body.classList.add("hive-room-active");
+            var room = document.getElementById("hiveRoom");
+            if (room) {
+              room.removeAttribute("hidden");
+              room.setAttribute("aria-hidden", "false");
+            }
+            window.setTimeout(startHiveGrandmaStory, 700);
+          }
+
+          function armRoomAfterPause() {
+            window.setTimeout(showHiveRoom, 300);
+          }
+
+          if (mq.matches || !treeWrap) {
+            armRoomAfterPause();
+            return;
+          }
+
+          var zoomHandled = false;
+          function onZoomEnd(ev) {
+            if (ev.propertyName !== "transform" || zoomHandled) return;
+            zoomHandled = true;
+            window.clearTimeout(zoomFallback);
+            treeWrap.removeEventListener("transitionend", onZoomEnd);
+            armRoomAfterPause();
+          }
+          treeWrap.addEventListener("transitionend", onZoomEnd, false);
+          var zoomFallback = window.setTimeout(function () {
+            if (zoomHandled) return;
+            zoomHandled = true;
+            treeWrap.removeEventListener("transitionend", onZoomEnd);
+            armRoomAfterPause();
+          }, 1300);
+        }, 300);
+      }
+
+      function beginYellowExit() {
+        if (
+          !flood ||
+          document.body.classList.contains("sky-only") ||
+          flood.classList.contains("is-exiting")
+        ) {
+          return;
+        }
+        if (mq.matches) {
+          enterSkyOnly();
+          return;
+        }
+        document.body.classList.add("sky-only-ui");
+        var shrink = flood.querySelector(".bee-honey-flood__shrink");
+        if (!shrink) {
+          enterSkyOnly();
+          return;
+        }
+        flood.classList.add("is-exiting");
+        var exitFallback = window.setTimeout(function () {
+          enterSkyOnly();
+        }, 850);
+        shrink.addEventListener(
+          "animationend",
+          function onShrink(ev) {
+            if (ev.animationName !== "bee-honey-shrink-br") return;
+            window.clearTimeout(exitFallback);
+            shrink.removeEventListener("animationend", onShrink);
+            enterSkyOnly();
+          },
+          false
+        );
+      }
+
+      function showHoneyFlood() {
+        if (!flood || flood.classList.contains("is-active")) return;
+        flood.removeAttribute("hidden");
+        flood.classList.add("is-active");
+        flood.setAttribute("aria-hidden", "false");
+
+        var lastWave = flood.querySelector(".bee-honey-flood__wave--3");
+        var skyTimer;
+
+        function scheduleSkyOnly() {
+          skyTimer = window.setTimeout(function () {
+            skyTimer = null;
+            beginYellowExit();
+          }, 380);
+        }
+
+        function onWaveEnd(ev) {
+          if (ev.animationName !== "bee-honey-expand") return;
+          lastWave.removeEventListener("animationend", onWaveEnd);
+          scheduleSkyOnly();
+        }
+
+        if (lastWave) {
+          lastWave.addEventListener("animationend", onWaveEnd, false);
+        } else {
+          scheduleSkyOnly();
+        }
+
+        window.setTimeout(function () {
+          if (document.body.classList.contains("sky-only")) return;
+          if (skyTimer) window.clearTimeout(skyTimer);
+          enterSkyOnly();
+        }, 8000);
+      }
+
+      function initSettingsModal() {
+        var modal = document.getElementById("settingsModal");
+        var btnSettings = document.getElementById("btn-settings");
+        var btnClose = document.getElementById("settingsModalClose");
+        var langBtn = document.getElementById("settingsLangBtn");
+        var picker = document.getElementById("settingsLangPicker");
+        var koBtn = document.getElementById("settingsLangKo");
+        var enBtn = document.getElementById("settingsLangEn");
+        if (!modal || !btnSettings || !btnClose || !langBtn || !picker) return;
+
+        function closeSettings() {
+          modal.setAttribute("hidden", "");
+          picker.setAttribute("hidden", "");
+          langBtn.setAttribute("aria-expanded", "false");
+        }
+
+        btnSettings.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          GameI18n.apply(GameI18n.getLang());
+          modal.removeAttribute("hidden");
+        });
+
+        btnClose.addEventListener("click", closeSettings);
+
+        modal.addEventListener("click", function (e) {
+          if (e.target === modal) closeSettings();
+        });
+
+        langBtn.addEventListener("click", function (e) {
+          e.stopPropagation();
+          if (picker.hasAttribute("hidden")) {
+            picker.removeAttribute("hidden");
+            langBtn.setAttribute("aria-expanded", "true");
+          } else {
+            picker.setAttribute("hidden", "");
+            langBtn.setAttribute("aria-expanded", "false");
+          }
+        });
+
+        function pickLang(lang) {
+          GameI18n.setLang(lang);
+          picker.setAttribute("hidden", "");
+          langBtn.setAttribute("aria-expanded", "false");
+        }
+
+        if (koBtn) {
+          koBtn.addEventListener("click", function () {
+            pickLang("ko");
+          });
+        }
+        if (enBtn) {
+          enBtn.addEventListener("click", function () {
+            pickLang("en");
+          });
+        }
+
+        document.addEventListener("keydown", function (e) {
+          if (
+            e.key === "Escape" &&
+            modal &&
+            !modal.hasAttribute("hidden")
+          ) {
+            closeSettings();
+          }
+        });
+      }
+
+      initSettingsModal();
+
+      btn.addEventListener("click", function () {
+        if (
+          mq.matches ||
+          bees.classList.contains("bees--start-dash") ||
+          bees.classList.contains("bees--offscreen")
+        ) {
+          return;
+        }
+        bees.classList.add("bees--start-dash");
+        bees.addEventListener(
+          "animationend",
+          function onEnd(e) {
+            if (e.animationName !== "bee-start-dash") return;
+            bees.classList.remove("bees--start-dash");
+            bees.classList.add("bees--offscreen");
+            bees.removeEventListener("animationend", onEnd);
+            window.setTimeout(showHoneyFlood, 1700);
+          },
+          false
+        );
+      });
+    })();
+  </script>
+</body>
+</html>
