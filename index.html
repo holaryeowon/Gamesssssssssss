@@ -3347,6 +3347,7 @@
         if (hintEl) {
           hintEl.setAttribute("hidden", "");
           hintEl.setAttribute("aria-hidden", "true");
+          hintEl.style.pointerEvents = "none";
         }
         if (mobileSpaceBtn) {
           mobileSpaceBtn.setAttribute("hidden", "");
@@ -3398,6 +3399,7 @@
               hintEl.removeAttribute("hidden");
               hintEl.setAttribute("aria-hidden", "false");
               if (tutorialHasTouch && mobileSpaceBtn) {
+                hintEl.style.pointerEvents = "auto";
                 mobileSpaceBtn.removeAttribute("hidden");
                 mobileSpaceBtn.setAttribute("aria-hidden", "false");
               }
