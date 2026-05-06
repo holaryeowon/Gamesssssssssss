@@ -760,6 +760,32 @@
       font-family: "Segoe UI", system-ui, sans-serif;
     }
 
+    .tutorial-space-hint__mobile-btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 0.7rem 1.4rem;
+      min-width: 7.5rem;
+      background: rgba(255, 255, 255, 0.94);
+      color: rgba(23, 35, 66, 0.92);
+      box-shadow:
+        0 6px 20px rgba(15, 36, 67, 0.2),
+        inset 0 0 0 1px rgba(63, 93, 147, 0.25);
+      font: inherit;
+      font-size: clamp(0.85rem, 3.4vw, 1rem);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      touch-action: none;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .tutorial-space-hint__mobile-btn:active {
+      transform: translateY(1px);
+      box-shadow:
+        0 4px 14px rgba(15, 36, 67, 0.24),
+        inset 0 0 0 1px rgba(63, 93, 147, 0.34);
+    }
+
     body.tutorial-welcome--flight .player-bee-solo__float {
       animation-play-state: paused;
     }
@@ -2243,7 +2269,23 @@
     hidden
     aria-hidden="true"
   >
-    <span class="tutorial-space-hint__kbd" data-i18n="tutorial.spaceKbd">Space</span>
+    <span
+      class="tutorial-space-hint__kbd"
+      id="tutorialSpaceKbd"
+      data-i18n="tutorial.spaceKbd"
+    >
+      Space
+    </span>
+    <button
+      type="button"
+      class="tutorial-space-hint__mobile-btn"
+      id="tutorialSpaceButton"
+      data-i18n="tutorial.spaceButton"
+      hidden
+      aria-label="Spacebar"
+    >
+      Spacebar
+    </button>
   </div>
   <div
     class="settings-modal"
@@ -2763,6 +2805,7 @@
             '이제 이 꿀벌은 앞 <span class="tutorial-flight__emph-shake">장애물</span>을 피해 가야돼요!',
           "tutorial.flightContinue": "계속",
           "tutorial.spaceKbd": "Space",
+          "tutorial.spaceButton": "Spacebar",
           "hive.roomAria":
             "벌집 안 방. 양옆에 책꽂이가 있고, 가운데 아기 꿀벌과 할머니 꿀벌이 있다.",
           "door.svgTitle": "출구 문",
@@ -2815,6 +2858,7 @@
             'Now this bee has to dodge the <span class="tutorial-flight__emph-shake">obstacles</span> ahead!',
           "tutorial.flightContinue": "Continue",
           "tutorial.spaceKbd": "Space",
+          "tutorial.spaceButton": "Spacebar",
           "hive.roomAria":
             "Inside the hive: bookshelves on both sides; a baby bee and a grandmother bee.",
           "door.svgTitle": "Exit door",
@@ -2941,6 +2985,7 @@
       var tutorialFlightSpaceHeld = false;
       var tutorialFlightStory = "idle";
       var tutorialFlightBeeX = 0;
+      var tutorialHasTouch = false;
 
       var COURSE_VX = 2.55;
       var COURSE_END_X = 368;
@@ -2950,6 +2995,20 @@
           window.clearTimeout(tid);
         });
         tutorialFlightTimers = [];
+      }
+
+      function detectTouchDevice() {
+        if (typeof window === "undefined") return false;
+        if (window.matchMedia) {
+          try {
+            if (window.matchMedia("(hover: none) and (pointer: coarse)").matches)
+              return true;
+          } catch (e) {}
+        }
+        return (
+          "ontouchstart" in window ||
+          (navigator && navigator.maxTouchPoints > 0)
+        );
       }
 
       function rectsOverlap(a, b) {
@@ -2987,6 +3046,24 @@
             true
           );
           document.removeEventListener("keyup", tutorialFlightHandlers.up, true);
+          if (tutorialFlightHandlers.mobileBtn) {
+            tutorialFlightHandlers.mobileBtn.removeEventListener(
+              "pointerdown",
+              tutorialFlightHandlers.mobileDown
+            );
+            tutorialFlightHandlers.mobileBtn.removeEventListener(
+              "pointerup",
+              tutorialFlightHandlers.mobileUp
+            );
+            tutorialFlightHandlers.mobileBtn.removeEventListener(
+              "pointercancel",
+              tutorialFlightHandlers.mobileUp
+            );
+            tutorialFlightHandlers.mobileBtn.removeEventListener(
+              "pointerleave",
+              tutorialFlightHandlers.mobileUp
+            );
+          }
           tutorialFlightHandlers = null;
         }
         tutorialFlightStory = "idle";
@@ -3224,6 +3301,8 @@
         var soloBee = document.getElementById("playerBeeSolo");
         var flightEl = document.getElementById("tutorialFlight");
         var hintEl = document.getElementById("tutorialSpaceHint");
+        var hintKbd = document.getElementById("tutorialSpaceKbd");
+        var mobileSpaceBtn = document.getElementById("tutorialSpaceButton");
         var l1 = document.getElementById("tutorialFlightL1");
         var l2 = document.getElementById("tutorialFlightL2");
         var l3 = document.getElementById("tutorialFlightL3");
@@ -3269,6 +3348,36 @@
           hintEl.setAttribute("hidden", "");
           hintEl.setAttribute("aria-hidden", "true");
         }
+        if (mobileSpaceBtn) {
+          mobileSpaceBtn.setAttribute("hidden", "");
+          mobileSpaceBtn.setAttribute("aria-hidden", "true");
+        }
+        if (hintKbd) {
+          if (tutorialHasTouch) hintKbd.setAttribute("hidden", "");
+          else hintKbd.removeAttribute("hidden");
+        }
+
+        function handleSpaceDown(isRepeat) {
+          if (!document.body.classList.contains("tutorial-welcome--flight")) return;
+          if (tutorialFlightStory === "intro") {
+            if (isRepeat) return;
+            goToCongratsFromIntro();
+            return;
+          }
+          if (tutorialFlightStory !== "course") return;
+          if (isRepeat) return;
+          tutorialFlightSpaceHeld = true;
+          if (hintEl && !hintEl.hasAttribute("hidden")) {
+            hintEl.setAttribute("hidden", "");
+            hintEl.setAttribute("aria-hidden", "true");
+          }
+        }
+
+        function handleSpaceUp() {
+          if (!document.body.classList.contains("tutorial-welcome--flight")) return;
+          if (tutorialFlightStory !== "course") return;
+          tutorialFlightSpaceHeld = false;
+        }
 
         tutorialFlightTimers.push(
           window.setTimeout(function () {
@@ -3288,6 +3397,10 @@
             ) {
               hintEl.removeAttribute("hidden");
               hintEl.setAttribute("aria-hidden", "false");
+              if (tutorialHasTouch && mobileSpaceBtn) {
+                mobileSpaceBtn.removeAttribute("hidden");
+                mobileSpaceBtn.setAttribute("aria-hidden", "false");
+              }
             }
           }, 2680)
         );
@@ -3297,18 +3410,7 @@
             return;
           if (e.code !== "Space" && e.key !== " ") return;
           e.preventDefault();
-          if (tutorialFlightStory === "intro") {
-            if (e.repeat) return;
-            goToCongratsFromIntro();
-            return;
-          }
-          if (tutorialFlightStory !== "course") return;
-          if (e.repeat) return;
-          tutorialFlightSpaceHeld = true;
-          if (hintEl && !hintEl.hasAttribute("hidden")) {
-            hintEl.setAttribute("hidden", "");
-            hintEl.setAttribute("aria-hidden", "true");
-          }
+          handleSpaceDown(e.repeat);
         }
 
         function onKeyUp(e) {
@@ -3316,13 +3418,34 @@
             return;
           if (e.code !== "Space" && e.key !== " ") return;
           e.preventDefault();
-          if (tutorialFlightStory !== "course") return;
-          tutorialFlightSpaceHeld = false;
+          handleSpaceUp();
         }
 
-        tutorialFlightHandlers = { down: onKeyDown, up: onKeyUp };
+        function onMobilePressStart(e) {
+          e.preventDefault();
+          handleSpaceDown(false);
+        }
+
+        function onMobilePressEnd(e) {
+          e.preventDefault();
+          handleSpaceUp();
+        }
+
+        tutorialFlightHandlers = {
+          down: onKeyDown,
+          up: onKeyUp,
+          mobileDown: onMobilePressStart,
+          mobileUp: onMobilePressEnd,
+          mobileBtn: tutorialHasTouch ? mobileSpaceBtn : null,
+        };
         document.addEventListener("keydown", onKeyDown, true);
         document.addEventListener("keyup", onKeyUp, true);
+        if (tutorialHasTouch && mobileSpaceBtn) {
+          mobileSpaceBtn.addEventListener("pointerdown", onMobilePressStart);
+          mobileSpaceBtn.addEventListener("pointerup", onMobilePressEnd);
+          mobileSpaceBtn.addEventListener("pointercancel", onMobilePressEnd);
+          mobileSpaceBtn.addEventListener("pointerleave", onMobilePressEnd);
+        }
       }
 
       function exitHiveRoom() {
@@ -3585,6 +3708,7 @@
       var btn = document.getElementById("btn-start");
       var flood = document.getElementById("beeHoneyFlood");
       var mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+      tutorialHasTouch = detectTouchDevice();
       if (!bees || !btn) return;
 
       var hiveStoryTimer;
